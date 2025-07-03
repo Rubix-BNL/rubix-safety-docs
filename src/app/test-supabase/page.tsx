@@ -256,20 +256,48 @@ export default function TestSupabasePage() {
   async function inspectBuckets() {
     setLoadingBuckets(true);
     try {
-      console.log("Inspecting storage buckets...");
+      console.log("Testing storage bucket access...");
 
-      const { data: bucketsData, error } = await supabase.storage.listBuckets();
+      // Test direct toegang tot safety-docs bucket
+      const { data: files, error } = await supabase.storage
+        .from("safety-docs")
+        .list("", { limit: 1 });
 
       if (error) {
-        console.error("Error listing buckets:", error);
-        setBuckets([{ error: error.message }]);
+        console.error("Error accessing safety-docs bucket:", error);
+        setBuckets([
+          {
+            name: "safety-docs",
+            accessible: false,
+            error: error.message,
+            id: "test",
+            created_at: new Date().toISOString(),
+          },
+        ]);
       } else {
-        console.log("Buckets found:", bucketsData);
-        setBuckets(bucketsData || []);
+        console.log("Safety-docs bucket accessible, files:", files);
+        setBuckets([
+          {
+            name: "safety-docs",
+            accessible: true,
+            files: files?.length || 0,
+            id: "safety-docs",
+            created_at: new Date().toISOString(),
+            public: true, // Assume public based on successful access
+          },
+        ]);
       }
     } catch (err: any) {
-      console.error("Bucket inspection failed:", err);
-      setBuckets([{ error: err.message || "Onbekende fout" }]);
+      console.error("Bucket test failed:", err);
+      setBuckets([
+        {
+          name: "safety-docs",
+          accessible: false,
+          error: err.message || "Onbekende fout",
+          id: "test",
+          created_at: new Date().toISOString(),
+        },
+      ]);
     } finally {
       setLoadingBuckets(false);
     }
