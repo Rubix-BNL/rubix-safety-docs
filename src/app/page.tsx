@@ -227,7 +227,7 @@ export default function HomePage() {
                   </p>
                 ) : (
                   <div>
-                    <p className="text-gray-500 text-lg mb-4">
+                    <p className="text-[#051e50] text-lg mb-4">
                       Nog geen artikelen toegevoegd
                     </p>
                     <button
