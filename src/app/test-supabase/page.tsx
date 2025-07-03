@@ -253,6 +253,28 @@ export default function TestSupabasePage() {
     setLoadingSchemas(false);
   }
 
+  async function inspectBuckets() {
+    setLoadingBuckets(true);
+    try {
+      console.log("Inspecting storage buckets...");
+
+      const { data: bucketsData, error } = await supabase.storage.listBuckets();
+
+      if (error) {
+        console.error("Error listing buckets:", error);
+        setBuckets([{ error: error.message }]);
+      } else {
+        console.log("Buckets found:", bucketsData);
+        setBuckets(bucketsData || []);
+      }
+    } catch (err: any) {
+      console.error("Bucket inspection failed:", err);
+      setBuckets([{ error: err.message || "Onbekende fout" }]);
+    } finally {
+      setLoadingBuckets(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-white p-8">
       <div className="max-w-2xl mx-auto">
