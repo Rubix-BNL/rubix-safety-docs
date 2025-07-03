@@ -16,6 +16,51 @@ export default function ArtikelList({ artikelen, onUpdate }: ArtikelListProps) {
     [key: string]: Veiligheidsblad[];
   }>({});
 
+  // Load veiligheidsbladen for all artikelen when component mounts or artikelen change
+  useEffect(() => {
+    async function loadAllVeiligheidsbladen() {
+      if (artikelen.length === 0) return;
+
+      console.log(
+        `Loading veiligheidsbladen for ${artikelen.length} artikelen`,
+      );
+
+      try {
+        const artikelIds = artikelen.map((artikel) => artikel.id);
+
+        const { data, error } = await supabase
+          .from("veiligheidsbladen")
+          .select("*")
+          .in("artikel_id", artikelIds)
+          .order("id", { ascending: false });
+
+        if (!error && data) {
+          console.log(`Found ${data.length} total veiligheidsbladen`);
+
+          // Group by artikel_id
+          const grouped = data.reduce(
+            (acc, vb) => {
+              if (!acc[vb.artikel_id]) {
+                acc[vb.artikel_id] = [];
+              }
+              acc[vb.artikel_id].push(vb);
+              return acc;
+            },
+            {} as { [key: string]: Veiligheidsblad[] },
+          );
+
+          setVeiligheidsbladenMap(grouped);
+        } else if (error) {
+          console.error("Error loading all veiligheidsbladen:", error);
+        }
+      } catch (err) {
+        console.error("Error loading all veiligheidsbladen:", err);
+      }
+    }
+
+    loadAllVeiligheidsbladen();
+  }, [artikelen]);
+
   async function loadVeiligheidsbladen(
     artikelId: string,
     forceRefresh = false,
