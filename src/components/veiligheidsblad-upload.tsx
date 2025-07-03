@@ -97,7 +97,7 @@ export default function VeiligheidsbladUpload({
           JSON.stringify(versionError, null, 2),
         );
         alert(
-          `Fout bij uploaden: ${versionError.message || "Onbekende fout"}\n\nDetails: ${versionError.error || versionError.statusText || "Geen extra details"}\n\nMogelijke oorzaak: Supabase Storage bucket bestaat niet of geen toegang`,
+          `❌ Upload mislukt\n\nHet veiligheidsblad kon niet worden geüpload naar de server.\n\nFoutmelding: ${versionError.message || "Onbekende fout"}\n\nMogelijke oorzaken:\n• Geen internetverbinding\n• Server tijdelijk niet beschikbaar\n• Bestand al bestaat\n\nProbeer het opnieuw of neem contact op met de beheerder.`,
         );
         return;
       }
@@ -138,7 +138,7 @@ export default function VeiligheidsbladUpload({
           JSON.stringify(dbError, null, 2),
         );
         alert(
-          `Fout bij opslaan in database: ${dbError.message || "Onbekende fout"}\n\nCode: ${dbError.code || "N/A"}\nDetails: ${dbError.details || "N/A"}`,
+          `❌ Database fout\n\nHet bestand is geüpload maar kon niet worden geregistreerd in de database.\n\nFoutmelding: ${dbError.message || "Onbekende fout"}\n\nNeem contact op met de beheerder om dit probleem op te lossen.`,
         );
         return;
       }
