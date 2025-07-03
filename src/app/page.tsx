@@ -217,7 +217,7 @@ export default function HomePage() {
             {loading ? (
               <div className="flex items-center justify-center py-12">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                <span className="ml-3 text-gray-600">Artikelen laden...</span>
+                <span className="ml-3 text-[#051e50]">Artikelen laden...</span>
               </div>
             ) : filteredArtikelen.length === 0 ? (
               <div className="text-center py-12">
