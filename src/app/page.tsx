@@ -86,6 +86,12 @@ export default function HomePage() {
             </div>
             <div className="flex items-center space-x-4">
               <a
+                href="/bulk"
+                className="text-[#051e50] hover:text-[#051e50] font-medium"
+              >
+                Bulk Import/Export
+              </a>
+              <a
                 href="/test-supabase"
                 className="text-[#051e50] hover:text-[#051e50] font-medium"
               >
