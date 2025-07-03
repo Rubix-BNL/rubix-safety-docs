@@ -16,12 +16,23 @@ interface TableTestResult {
   needsRLS?: boolean;
 }
 
+interface ColumnInfo {
+  column_name: string;
+  data_type: string;
+  is_nullable: string;
+  column_default: string | null;
+}
+
 export default function TestSupabasePage() {
   const [status, setStatus] = useState<ConnectionStatus | null>(null);
   const [tableTests, setTableTests] = useState<TableTestResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [tableData, setTableData] = useState<{ [key: string]: any[] }>({});
   const [inspectingTables, setInspectingTables] = useState(false);
+  const [tableSchemas, setTableSchemas] = useState<{
+    [key: string]: ColumnInfo[];
+  }>({});
+  const [loadingSchemas, setLoadingSchemas] = useState(false);
 
   useEffect(() => {
     async function testConnection() {
@@ -135,6 +146,55 @@ export default function TestSupabasePage() {
 
     setTableData(data);
     setInspectingTables(false);
+  }
+
+  async function inspectSchemas() {
+    setLoadingSchemas(true);
+    const schemas: { [key: string]: ColumnInfo[] } = {};
+
+    const tablesToInspect = ["artikelen", "veiligheidsbladen"];
+
+    for (const tableName of tablesToInspect) {
+      try {
+        // Get table schema from information_schema
+        const { data: schemaData, error } = await supabase
+          .from("information_schema.columns")
+          .select("column_name, data_type, is_nullable, column_default")
+          .eq("table_schema", "public")
+          .eq("table_name", tableName)
+          .order("ordinal_position");
+
+        if (!error && schemaData) {
+          schemas[tableName] = schemaData;
+        } else {
+          // Fallback: try to get schema by doing a limit 0 query
+          const { data: fallbackData, error: fallbackError } = await supabase
+            .from(tableName)
+            .select("*")
+            .limit(0);
+
+          if (!fallbackError) {
+            // This gives us the structure but not the data types
+            schemas[tableName] = Object.keys(fallbackData?.[0] || {}).map(
+              (col) => ({
+                column_name: col,
+                data_type: "unknown",
+                is_nullable: "unknown",
+                column_default: null,
+              }),
+            );
+          } else {
+            schemas[tableName] = [];
+          }
+        }
+      } catch (err) {
+        console.error(`Error getting schema for ${tableName}:`, err);
+        schemas[tableName] = [];
+      }
+    }
+
+    setTableSchemas(schemas);
+    setLoadingSchemas(false);
   }
 
   return (
@@ -310,6 +370,73 @@ export default function TestSupabasePage() {
           </div>
         )}
 
+        {Object.keys(tableSchemas).length > 0 && (
+          <div className="bg-gray-50 rounded-lg p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-4 text-gray-800">
+              Tabel Schema's
+            </h2>
+            {Object.entries(tableSchemas).map(([tableName, columns]) => (
+              <div key={tableName} className="mb-6">
+                <h3 className="text-lg font-medium mb-3 text-gray-700 capitalize">
+                  {tableName} Schema ({columns.length} kolommen)
+                </h3>
+                {columns.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full bg-white border border-gray-200 rounded">
+                      <thead className="bg-gray-100">
+                        <tr>
+                          <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 border-b">
+                            Kolom Naam
+                          </th>
+                          <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 border-b">
+                            Data Type
+                          </th>
+                          <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 border-b">
+                            Nullable
+                          </th>
+                          <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 border-b">
+                            Default
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {columns.map((column, index) => (
+                          <tr key={index} className="border-b">
+                            <td className="px-4 py-2 text-sm font-mono text-gray-800">
+                              {column.column_name}
+                            </td>
+                            <td className="px-4 py-2 text-sm text-gray-600">
+                              {column.data_type}
+                            </td>
+                            <td className="px-4 py-2 text-sm text-gray-600">
+                              <span
+                                className={`px-2 py-1 rounded text-xs ${
+                                  column.is_nullable === "YES"
+                                    ? "bg-yellow-100 text-yellow-800"
+                                    : "bg-green-100 text-green-800"
+                                }`}
+                              >
+                                {column.is_nullable === "YES" ? "Ja" : "Nee"}
+                              </span>
+                            </td>
+                            <td className="px-4 py-2 text-sm text-gray-600 font-mono">
+                              {column.column_default || "-"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p className="text-gray-500 italic">
+                    Schema niet beschikbaar
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
           <h3 className="text-lg font-semibold mb-3 text-blue-900">
             Configuratie Checklist
@@ -351,6 +478,13 @@ export default function TestSupabasePage() {
             className="ml-4 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-lg transition-colors"
           >
             {inspectingTables ? "Tabellen onderzoeken..." : "Bekijk Tabel Data"}
+          </button>
+          <button
+            onClick={inspectSchemas}
+            disabled={loadingSchemas || !status?.connected}
+            className="ml-4 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+          >
+            {loadingSchemas ? "Schema laden..." : "Bekijk Schema's"}
           </button>
           <a
             href="/"
