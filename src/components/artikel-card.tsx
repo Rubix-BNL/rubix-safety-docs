@@ -26,7 +26,7 @@ export default function ArtikelCard({ artikel, onUpdate }: ArtikelCardProps) {
         .from("veiligheidsbladen")
         .select("*")
         .eq("artikel_id", artikel.id)
-        .order("created_at", { ascending: false });
+        .order("id", { ascending: false });
 
       if (error) {
         console.error("Error loading veiligheidsbladen:", error);
@@ -46,7 +46,8 @@ export default function ArtikelCard({ artikel, onUpdate }: ArtikelCardProps) {
       .filter((vb) => vb.taal === taal)
       .sort(
         (a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+          new Date(b.upload_datum).getTime() -
+          new Date(a.upload_datum).getTime(),
       )[0];
   }
 

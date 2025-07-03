@@ -38,7 +38,7 @@ export default function AdminPage() {
       const { data, error } = await supabase
         .from("artikelen")
         .select("*")
-        .order("created_at", { ascending: false });
+        .order("id", { ascending: false });
 
       if (error) {
         console.error("Full error object:", JSON.stringify(error, null, 2));

@@ -6,8 +6,8 @@ export interface Artikel {
   artikelnummer?: string;
   ean_code?: string;
   referentie_nummer?: string;
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Veiligheidsblad {
