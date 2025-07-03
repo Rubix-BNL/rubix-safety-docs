@@ -176,7 +176,7 @@ export default function HomePage() {
                 <span className="text-sm text-[#051e50]">Weergave:</span>
                 <button
                   onClick={() => setViewMode("list")}
-                  className={`p-2 rounded ${viewMode === "list" ? "bg-blue-100 text-blue-600" : "text-gray-400 hover:text-gray-600"}`}
+                  className={`p-2 rounded ${viewMode === "list" ? "bg-blue-100 text-blue-600" : "text-[#051e50] hover:text-[#051e50]"}`}
                 >
                   <svg
                     className="w-5 h-5"
