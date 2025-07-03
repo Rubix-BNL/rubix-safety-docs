@@ -105,7 +105,7 @@ export default function HomePage() {
       <div className="max-w-7xl mx-auto p-6">
         {showForm && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h2 className="text-xl font-semibold mb-4">
+            <h2 className="text-xl font-semibold mb-4 text-[#051e50]">
               Nieuw Artikel Toevoegen
             </h2>
             <ArtikelForm
