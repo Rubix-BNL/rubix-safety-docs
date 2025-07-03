@@ -24,12 +24,16 @@ export default function AdminPage() {
 
       if (error) {
         console.error("Error loading artikelen:", error);
+        alert(
+          `Fout bij laden artikelen: ${error.message}\n\nDetails: ${error.hint || "Geen extra details"}\n\nMogelijke oorzaak: RLS policy niet ingesteld voor artikelen tabel`,
+        );
         return;
       }
 
       setArtikelen(data || []);
     } catch (err) {
       console.error("Error:", err);
+      alert(`Er is een onverwachte fout opgetreden: ${err}`);
     } finally {
       setLoading(false);
     }
