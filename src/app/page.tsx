@@ -6,6 +6,8 @@ import { Artikel } from "@/lib/types";
 import ArtikelCard from "@/components/artikel-card";
 import ArtikelList from "@/components/artikel-list";
 import ArtikelForm from "@/components/artikel-form";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export default function HomePage() {
   const [artikelen, setArtikelen] = useState<Artikel[]>([]);
@@ -91,12 +93,12 @@ export default function HomePage() {
               >
                 Bulk Import/Export
               </a>
-              <button
+              <Button
                 onClick={() => setShowForm(!showForm)}
-                className="bg-[#051e50] hover:bg-opacity-90 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                className="bg-[#051e50] hover:bg-[#051e50]/90 text-white font-medium"
               >
                 {showForm ? "Annuleren" : "Nieuw Artikel"}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -124,12 +126,13 @@ export default function HomePage() {
               {error}
             </pre>
             <div className="mt-4">
-              <button
+              <Button
                 onClick={loadArtikelen}
-                className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors mr-4"
+                variant="destructive"
+                className="mr-4"
               >
                 Opnieuw proberen
-              </button>
+              </Button>
               <a
                 href="/test-supabase"
                 className="text-red-600 hover:text-red-800 font-medium"
@@ -146,12 +149,12 @@ export default function HomePage() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
               <div className="flex items-center space-x-4">
                 <div className="relative">
-                  <input
+                  <Input
                     type="text"
                     placeholder="Zoeken op naam, ID, referenties..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
+                    className="pl-10 w-64"
                   />
                   <svg
                     className="absolute left-3 top-2.5 h-5 w-5 text-[#051e50]"
@@ -174,9 +177,15 @@ export default function HomePage() {
 
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-[#051e50]">Weergave:</span>
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() => setViewMode("list")}
-                  className={`p-2 rounded ${viewMode === "list" ? "bg-blue-100 text-blue-600" : "text-[#051e50] hover:text-[#051e50]"}`}
+                  className={
+                    viewMode === "list"
+                      ? "bg-blue-100 text-blue-600"
+                      : "text-[#051e50] hover:text-[#051e50]"
+                  }
                 >
                   <svg
                     className="w-5 h-5"
@@ -191,10 +200,16 @@ export default function HomePage() {
                       d="M4 6h16M4 10h16M4 14h16M4 18h16"
                     />
                   </svg>
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() => setViewMode("cards")}
-                  className={`p-2 rounded ${viewMode === "cards" ? "bg-blue-100 text-blue-600" : "text-[#051e50] hover:text-[#051e50]"}`}
+                  className={
+                    viewMode === "cards"
+                      ? "bg-blue-100 text-blue-600"
+                      : "text-[#051e50] hover:text-[#051e50]"
+                  }
                 >
                   <svg
                     className="w-5 h-5"
@@ -209,7 +224,7 @@ export default function HomePage() {
                       d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
                     />
                   </svg>
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -230,12 +245,13 @@ export default function HomePage() {
                     <p className="text-[#051e50] text-lg mb-4">
                       Nog geen artikelen toegevoegd
                     </p>
-                    <button
+                    <Button
+                      variant="link"
                       onClick={() => setShowForm(true)}
-                      className="text-blue-600 hover:text-blue-800 font-medium"
+                      className="text-blue-600 hover:text-blue-800 p-0 h-auto"
                     >
                       Voeg je eerste artikel toe
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>
