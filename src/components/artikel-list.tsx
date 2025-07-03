@@ -64,14 +64,18 @@ export default function ArtikelList({ artikelen, onUpdate }: ArtikelListProps) {
     });
   }
 
-  function handleVeiligheidsbladUpdate(artikelId: string) {
-    // Reload veiligheidsbladen for this artikel
+  async function handleVeiligheidsbladUpdate(artikelId: string) {
+    // Clear cache for this artikel
     setVeiligheidsbladenMap((prev) => {
       const updated = { ...prev };
       delete updated[artikelId];
       return updated;
     });
-    loadVeiligheidsbladen(artikelId);
+
+    // Reload veiligheidsbladen for this artikel
+    await loadVeiligheidsbladen(artikelId);
+
+    // Also refresh the main artikel list to get any updates
     onUpdate();
   }
 
