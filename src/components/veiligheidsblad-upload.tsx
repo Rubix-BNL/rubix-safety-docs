@@ -148,7 +148,7 @@ export default function VeiligheidsbladUpload({
     } catch (err: unknown) {
       console.error("Upload error:", err);
       alert(
-        `Er is een onverwachte fout opgetreden: ${err?.message || err?.toString() || "Onbekende fout"}`,
+        `❌ Onverwachte fout\n\nEr is een onverwachte fout opgetreden tijdens het uploaden.\n\nFoutmelding: ${err?.message || err?.toString() || "Onbekende fout"}\n\nProbeer het opnieuw of neem contact op met de beheerder.`,
       );
     } finally {
       setIsUploading(false);
