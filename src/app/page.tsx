@@ -173,7 +173,7 @@ export default function HomePage() {
               </div>
 
               <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-600">Weergave:</span>
+                <span className="text-sm text-[#051e50]">Weergave:</span>
                 <button
                   onClick={() => setViewMode("list")}
                   className={`p-2 rounded ${viewMode === "list" ? "bg-blue-100 text-blue-600" : "text-gray-400 hover:text-gray-600"}`}
