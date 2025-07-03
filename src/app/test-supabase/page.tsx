@@ -33,6 +33,8 @@ export default function TestSupabasePage() {
     [key: string]: ColumnInfo[];
   }>({});
   const [loadingSchemas, setLoadingSchemas] = useState(false);
+  const [buckets, setBuckets] = useState<any[]>([]);
+  const [loadingBuckets, setLoadingBuckets] = useState(false);
 
   useEffect(() => {
     async function testConnection() {
