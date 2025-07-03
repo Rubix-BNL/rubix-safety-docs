@@ -73,7 +73,9 @@ export default function BulkPage() {
           </div>
 
           <div className="p-6">
-            {activeTab === "export" ? <BulkExport /> : <BulkImport />}
+            {activeTab === "export" && <BulkExport />}
+            {activeTab === "import" && <BulkImport />}
+            {activeTab === "documents" && <BulkDocumentUpload />}
           </div>
         </div>
 
