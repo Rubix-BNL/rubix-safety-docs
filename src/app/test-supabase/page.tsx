@@ -156,43 +156,97 @@ export default function TestSupabasePage() {
 
     for (const tableName of tablesToInspect) {
       try {
-        // Get table schema from information_schema
-        const { data: schemaData, error } = await supabase
-          .from("information_schema.columns")
-          .select("column_name, data_type, is_nullable, column_default")
-          .eq("table_schema", "public")
-          .eq("table_name", tableName)
-          .order("ordinal_position");
+        console.log(`Inspecting schema for table: ${tableName}`);
 
-        if (!error && schemaData) {
+        // Method 1: Try information_schema
+        let schemaData = null;
+        let error = null;
+
+        try {
+          const result = await supabase
+            .from("information_schema.columns")
+            .select("column_name, data_type, is_nullable, column_default")
+            .eq("table_schema", "public")
+            .eq("table_name", tableName)
+            .order("ordinal_position");
+
+          schemaData = result.data;
+          error = result.error;
+          console.log(`Information schema result for ${tableName}:`, {
+            data: schemaData,
+            error,
+          });
+        } catch (infoError) {
+          console.log(`Information schema failed for ${tableName}:`, infoError);
+        }
+
+        if (!error && schemaData && schemaData.length > 0) {
           schemas[tableName] = schemaData;
         } else {
-          // Fallback: try to get schema by doing a limit 0 query
-          const { data: fallbackData, error: fallbackError } = await supabase
+          console.log(`Trying fallback method for ${tableName}`);
+
+          // Method 2: Try to get actual data and extract structure
+          const { data: sampleData, error: sampleError } = await supabase
             .from(tableName)
             .select("*")
-            .limit(0);
+            .limit(1);
 
-          if (!fallbackError) {
-            // This gives us the structure but not the data types
-            schemas[tableName] = Object.keys(fallbackData?.[0] || {}).map(
-              (col) => ({
-                column_name: col,
-                data_type: "unknown",
-                is_nullable: "unknown",
-                column_default: null,
-              }),
-            );
+          if (!sampleError && sampleData && sampleData.length > 0) {
+            // Extract column names from actual data
+            const columns = Object.keys(sampleData[0]).map((col) => ({
+              column_name: col,
+              data_type:
+                typeof sampleData[0][col] === "string"
+                  ? "text"
+                  : typeof sampleData[0][col] === "number"
+                    ? "numeric"
+                    : sampleData[0][col] instanceof Date
+                      ? "timestamp"
+                      : sampleData[0][col] === null
+                        ? "unknown"
+                        : "unknown",
+              is_nullable: sampleData[0][col] === null ? "YES" : "NO",
+              column_default: null,
+            }));
+            schemas[tableName] = columns;
+            console.log(`Fallback successful for ${tableName}:`, columns);
           } else {
-            schemas[tableName] = [];
+            console.log(`Sample data failed for ${tableName}:`, sampleError);
+
+            // Method 3: Try empty select to get error with column info
+            try {
+              const { error: emptyError } = await supabase
+                .from(tableName)
+                .select("*")
+                .limit(0);
+
+              if (!emptyError) {
+                // If no error but no data, we can't determine structure
+                schemas[tableName] = [
+                  {
+                    column_name: "Tabel bestaat maar is leeg",
+                    data_type: "unknown",
+                    is_nullable: "unknown",
+                    column_default: null,
+                  },
+                ];
+              } else {
+                console.log(`Empty select error for ${tableName}:`, emptyError);
+                schemas[tableName] = [];
+              }
+            } catch (emptyErr) {
+              console.log(`Empty select failed for ${tableName}:`, emptyErr);
+              schemas[tableName] = [];
+            }
           }
         }
       } catch (err) {
-        console.error(`Error getting schema for ${tableName}:`, err);
+        console.error(`Complete error for ${tableName}:`, err);
         schemas[tableName] = [];
       }
     }
 
+    console.log("Final schemas:", schemas);
     setTableSchemas(schemas);
     setLoadingSchemas(false);
   }
