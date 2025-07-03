@@ -78,6 +78,8 @@ export default function ArtikelList({ artikelen, onUpdate }: ArtikelListProps) {
   }
 
   async function handleVeiligheidsbladUpdate(artikelId: string) {
+    console.log(`Updating veiligheidsbladen for artikel ${artikelId}`);
+
     // Clear cache for this artikel
     setVeiligheidsbladenMap((prev) => {
       const updated = { ...prev };
@@ -85,8 +87,8 @@ export default function ArtikelList({ artikelen, onUpdate }: ArtikelListProps) {
       return updated;
     });
 
-    // Reload veiligheidsbladen for this artikel
-    await loadVeiligheidsbladen(artikelId);
+    // Force reload veiligheidsbladen for this artikel
+    await loadVeiligheidsbladen(artikelId, true);
 
     // Also refresh the main artikel list to get any updates
     onUpdate();
