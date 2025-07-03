@@ -82,35 +82,36 @@ export default function BulkPage() {
         {/* Info section */}
         {activeTab !== "documents" && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-          <h3 className="text-lg font-semibold mb-3 text-blue-900">
-            Instructies
-          </h3>
-          <div className="space-y-4">
-            <div>
-              <h4 className="font-medium text-blue-800">Export:</h4>
-              <ul className="text-blue-700 text-sm space-y-1 ml-4">
-                <li>• Download alle artikelen als CSV bestand</li>
-                <li>• Inclusief alle metadata en referenties</li>
-                <li>
-                  • Kan geopend worden in Excel of andere spreadsheet
-                  programma's
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-medium text-blue-800">Import:</h4>
-              <ul className="text-blue-700 text-sm space-y-1 ml-4">
-                <li>• Upload een CSV bestand met artikelen</li>
-                <li>• Vereiste kolommen: naam, unieke_id</li>
-                <li>
-                  • Optionele kolommen: referentie_rubix, referentie_fabrikant,
-                  ean
-                </li>
-                <li>• Duplicaten worden automatisch gedetecteerd</li>
-              </ul>
+            <h3 className="text-lg font-semibold mb-3 text-blue-900">
+              Instructies
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-medium text-blue-800">Export:</h4>
+                <ul className="text-blue-700 text-sm space-y-1 ml-4">
+                  <li>• Download alle artikelen als CSV bestand</li>
+                  <li>• Inclusief alle metadata en referenties</li>
+                  <li>
+                    • Kan geopend worden in Excel of andere spreadsheet
+                    programma's
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-medium text-blue-800">Import:</h4>
+                <ul className="text-blue-700 text-sm space-y-1 ml-4">
+                  <li>• Upload een CSV bestand met artikelen</li>
+                  <li>• Vereiste kolommen: naam, unieke_id</li>
+                  <li>
+                    • Optionele kolommen: referentie_rubix,
+                    referentie_fabrikant, ean
+                  </li>
+                  <li>• Duplicaten worden automatisch gedetecteerd</li>
+                </ul>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
