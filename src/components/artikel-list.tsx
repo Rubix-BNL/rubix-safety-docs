@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { Artikel, Veiligheidsblad, TALEN } from "@/lib/types";
 import VeiligheidsbladUpload from "@/components/veiligheidsblad-upload";
