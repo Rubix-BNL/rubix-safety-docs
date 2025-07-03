@@ -20,6 +20,8 @@ export default function TestSupabasePage() {
   const [status, setStatus] = useState<ConnectionStatus | null>(null);
   const [tableTests, setTableTests] = useState<TableTestResult[]>([]);
   const [loading, setLoading] = useState(true);
+  const [tableData, setTableData] = useState<{ [key: string]: any[] }>({});
+  const [inspectingTables, setInspectingTables] = useState(false);
 
   useEffect(() => {
     async function testConnection() {
@@ -107,6 +109,33 @@ export default function TestSupabasePage() {
 
     testConnection();
   }, []);
+
+  async function inspectTables() {
+    setInspectingTables(true);
+    const data: { [key: string]: any[] } = {};
+
+    const tablesToInspect = ["artikelen", "veiligheidsbladen"];
+
+    for (const tableName of tablesToInspect) {
+      try {
+        const { data: tableData, error } = await supabase
+          .from(tableName)
+          .select("*")
+          .limit(5);
+
+        if (!error && tableData) {
+          data[tableName] = tableData;
+        } else {
+          data[tableName] = [];
+        }
+      } catch (err) {
+        data[tableName] = [];
+      }
+    }
+
+    setTableData(data);
+    setInspectingTables(false);
+  }
 
   return (
     <div className="min-h-screen bg-white p-8">
@@ -230,6 +259,57 @@ export default function TestSupabasePage() {
           </div>
         )}
 
+        {Object.keys(tableData).length > 0 && (
+          <div className="bg-gray-50 rounded-lg p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-4 text-gray-800">
+              Tabel Data Inspectie
+            </h2>
+            {Object.entries(tableData).map(([tableName, rows]) => (
+              <div key={tableName} className="mb-6">
+                <h3 className="text-lg font-medium mb-3 text-gray-700 capitalize">
+                  {tableName} ({rows.length} records)
+                </h3>
+                {rows.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full bg-white border border-gray-200 rounded">
+                      <thead className="bg-gray-100">
+                        <tr>
+                          {Object.keys(rows[0]).map((column) => (
+                            <th
+                              key={column}
+                              className="px-4 py-2 text-left text-sm font-medium text-gray-700 border-b"
+                            >
+                              {column}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {rows.map((row, index) => (
+                          <tr key={index} className="border-b">
+                            {Object.values(row).map((value: any, cellIndex) => (
+                              <td
+                                key={cellIndex}
+                                className="px-4 py-2 text-sm text-gray-600"
+                              >
+                                {typeof value === "object" && value !== null
+                                  ? JSON.stringify(value)
+                                  : String(value || "")}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p className="text-gray-500 italic">Geen data gevonden</p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
           <h3 className="text-lg font-semibold mb-3 text-blue-900">
             Configuratie Checklist
@@ -264,6 +344,13 @@ export default function TestSupabasePage() {
             className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
           >
             Opnieuw testen
+          </button>
+          <button
+            onClick={inspectTables}
+            disabled={inspectingTables || !status?.connected}
+            className="ml-4 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+          >
+            {inspectingTables ? "Tabellen onderzoeken..." : "Bekijk Tabel Data"}
           </button>
           <a
             href="/"
