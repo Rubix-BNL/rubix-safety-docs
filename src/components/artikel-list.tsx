@@ -216,7 +216,7 @@ export default function ArtikelList({ artikelen, onUpdate }: ArtikelListProps) {
                                         href={`${supabase.storage.from("safety-docs").getPublicUrl(veiligheidsblad.storage_path).data.publicUrl}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                                        className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-[#051e50] hover:bg-opacity-90 transition-colors"
                                       >
                                         Bekijken
                                       </a>
@@ -230,7 +230,7 @@ export default function ArtikelList({ artikelen, onUpdate }: ArtikelListProps) {
                                           )
                                         }
                                         trigger={
-                                          <button className="text-xs text-green-600 hover:text-green-800 font-medium">
+                                          <button className="inline-flex items-center px-3 py-1.5 border border-[#ffd700] text-xs font-medium rounded-md text-[#051e50] bg-[#ffd700] hover:bg-opacity-90 transition-colors">
                                             Update
                                           </button>
                                         }
