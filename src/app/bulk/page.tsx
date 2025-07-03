@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { Artikel } from "@/lib/types";
 import BulkExport from "@/components/bulk-export";
 import BulkImport from "@/components/bulk-import";
+import BulkDocumentUpload from "@/components/bulk-document-upload";
 import { Button } from "@/components/ui/button";
 
 export default function BulkPage() {
