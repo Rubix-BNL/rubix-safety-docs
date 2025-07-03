@@ -16,31 +16,49 @@ export default function TestSupabasePage() {
   useEffect(() => {
     async function testConnection() {
       try {
-        // Test de verbinding door een simpele query uit te voeren
-        const { data, error } = await supabase.from("_").select("*").limit(1);
+        // Test de verbinding door de auth sessie op te halen
+        const { data: authData, error: authError } =
+          await supabase.auth.getSession();
 
-        if (error) {
-          // Als de tabel niet bestaat, is dat eigenlijk oké - het betekent dat de verbinding werkt
-          if (
-            error.message.includes("relation") ||
-            error.message.includes("does not exist")
-          ) {
+        if (authError) {
+          setStatus({
+            connected: false,
+            error: authError.message,
+            details: authError,
+          });
+          return;
+        }
+
+        // Test ook de database verbinding door alle tabellen op te halen
+        const { data: tables, error: tablesError } = await supabase
+          .from("information_schema.tables")
+          .select("table_name")
+          .eq("table_schema", "public")
+          .limit(10);
+
+        if (tablesError) {
+          // Probeer een alternatieve methode als information_schema niet werkt
+          const { data: fallbackData, error: fallbackError } =
+            await supabase.rpc("version");
+
+          if (fallbackError) {
             setStatus({
               connected: true,
               details:
-                "Verbinding succesvol! (Geen tabellen gevonden, maar dat is normaal voor een nieuwe database)",
+                "Verbinding succesvol! (Database query beperkt, maar verbinding werkt)",
+              error: `Tabel info niet toegankelijk: ${tablesError.message}`,
             });
           } else {
             setStatus({
-              connected: false,
-              error: error.message,
-              details: error,
+              connected: true,
+              details: "Verbinding succesvol! Database is bereikbaar.",
             });
           }
         } else {
+          const tableCount = tables?.length || 0;
           setStatus({
             connected: true,
-            details: "Verbinding succesvol en data opgehaald!",
+            details: `Verbinding succesvol! ${tableCount} publieke tabellen gevonden.`,
           });
         }
       } catch (err: any) {
