@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { Artikel, Veiligheidsblad, TALEN } from "@/lib/types";
 import VeiligheidsbladUpload from "@/components/veiligheidsblad-upload";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 interface ArtikelCardProps {
   artikel: Artikel;
@@ -61,9 +64,9 @@ export default function ArtikelCard({ artikel, onUpdate }: ArtikelCardProps) {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+    <Card className="overflow-hidden">
       {/* Artikel Header */}
-      <div className="p-6 border-b border-gray-200">
+      <CardHeader className="border-b border-gray-200">
         <h3 className="text-lg font-semibold text-gray-900 mb-2">
           {artikel.naam}
         </h3>
@@ -90,10 +93,10 @@ export default function ArtikelCard({ artikel, onUpdate }: ArtikelCardProps) {
             </p>
           )}
         </div>
-      </div>
+      </CardHeader>
 
       {/* Veiligheidsbladen Section */}
-      <div className="p-6">
+      <CardContent className="pt-6">
         <h4 className="text-md font-semibold text-gray-900 mb-4">
           Veiligheidsbladen
         </h4>
@@ -117,9 +120,12 @@ export default function ArtikelCard({ artikel, onUpdate }: ArtikelCardProps) {
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center">
-                      <span className="text-xs font-semibold bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                      <Badge
+                        variant="secondary"
+                        className="bg-blue-100 text-blue-800"
+                      >
                         {taal.code}
-                      </span>
+                      </Badge>
                       <span className="ml-2 text-sm font-medium text-gray-700">
                         {taal.naam}
                       </span>
@@ -142,7 +148,9 @@ export default function ArtikelCard({ artikel, onUpdate }: ArtikelCardProps) {
                         </span>
                       </div>
                       <div className="flex space-x-2">
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={async () => {
                             console.log(
                               "Storage path:",
@@ -179,19 +187,23 @@ export default function ArtikelCard({ artikel, onUpdate }: ArtikelCardProps) {
                               window.open(signedUrl.signedUrl, "_blank");
                             }
                           }}
-                          className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                          className="text-xs text-blue-600 hover:text-blue-800 h-auto p-1"
                         >
                           Bekijken
-                        </button>
+                        </Button>
                         <VeiligheidsbladUpload
                           artikelId={artikel.id}
                           taal={taal.code}
                           currentVersion={latestVeiligheidsblad?.versie}
                           onUploadSuccess={loadVeiligheidsbladen}
                           trigger={
-                            <button className="text-xs text-green-600 hover:text-green-800 font-medium">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-xs text-green-600 hover:text-green-800 h-auto p-1"
+                            >
                               Update
-                            </button>
+                            </Button>
                           }
                         />
                       </div>
@@ -213,7 +225,7 @@ export default function ArtikelCard({ artikel, onUpdate }: ArtikelCardProps) {
             })}
           </div>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
