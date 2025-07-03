@@ -194,7 +194,7 @@ export default function HomePage() {
                 </button>
                 <button
                   onClick={() => setViewMode("cards")}
-                  className={`p-2 rounded ${viewMode === "cards" ? "bg-blue-100 text-blue-600" : "text-gray-400 hover:text-gray-600"}`}
+                  className={`p-2 rounded ${viewMode === "cards" ? "bg-blue-100 text-blue-600" : "text-[#051e50] hover:text-[#051e50]"}`}
                 >
                   <svg
                     className="w-5 h-5"
