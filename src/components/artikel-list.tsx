@@ -16,10 +16,17 @@ export default function ArtikelList({ artikelen, onUpdate }: ArtikelListProps) {
     [key: string]: Veiligheidsblad[];
   }>({});
 
-  async function loadVeiligheidsbladen(artikelId: string) {
-    if (veiligheidsbladenMap[artikelId]) return; // Already loaded
+  async function loadVeiligheidsbladen(
+    artikelId: string,
+    forceRefresh = false,
+  ) {
+    if (veiligheidsbladenMap[artikelId] && !forceRefresh) return; // Already loaded
 
     try {
+      console.log(
+        `Loading veiligheidsbladen for artikel ${artikelId}${forceRefresh ? " (forced refresh)" : ""}`,
+      );
+
       const { data, error } = await supabase
         .from("veiligheidsbladen")
         .select("*")
@@ -27,10 +34,16 @@ export default function ArtikelList({ artikelen, onUpdate }: ArtikelListProps) {
         .order("id", { ascending: false });
 
       if (!error && data) {
+        console.log(
+          `Found ${data.length} veiligheidsbladen for artikel ${artikelId}:`,
+          data,
+        );
         setVeiligheidsbladenMap((prev) => ({
           ...prev,
           [artikelId]: data,
         }));
+      } else if (error) {
+        console.error("Error loading veiligheidsbladen:", error);
       }
     } catch (err) {
       console.error("Error loading veiligheidsbladen:", err);
