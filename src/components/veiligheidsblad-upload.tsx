@@ -52,13 +52,17 @@ export default function VeiligheidsbladUpload({
         !file.type.includes("word") &&
         !file.type.includes("document")
       ) {
-        alert("Alleen PDF en Word documenten zijn toegestaan");
+        alert(
+          "❌ Bestandstype niet ondersteund\n\nAlleen PDF en Word documenten (.pdf, .doc, .docx) kunnen worden geüpload.\n\nKies een geldig documentbestand.",
+        );
         return;
       }
 
       // Validate file size (max 10MB)
       if (file.size > 10 * 1024 * 1024) {
-        alert("Bestand mag maximaal 10MB zijn");
+        alert(
+          "❌ Bestand te groot\n\nHet geselecteerde bestand is groter dan 10MB.\n\nComprimeer het bestand of kies een kleinere versie.",
+        );
         return;
       }
 
