@@ -167,7 +167,7 @@ export default function HomePage() {
                     />
                   </svg>
                 </div>
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-[#051e50]">
                   {filteredArtikelen.length} van {artikelen.length} artikelen
                 </span>
               </div>
