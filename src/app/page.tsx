@@ -87,7 +87,7 @@ export default function HomePage() {
             <div className="flex items-center space-x-4">
               <a
                 href="/test-supabase"
-                className="text-gray-600 hover:text-gray-800 font-medium"
+                className="text-[#051e50] hover:text-[#051e50] font-medium"
               >
                 Test Database
               </a>
