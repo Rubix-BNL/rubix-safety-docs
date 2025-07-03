@@ -72,7 +72,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 flex items-center">
+              <h1 className="text-2xl font-bold text-[#051e50] flex items-center">
                 <img
                   src="/RUBIX_logo_blue.svg"
                   alt="Rubix"
@@ -80,7 +80,7 @@ export default function HomePage() {
                 />
                 Safety Documentation
               </h1>
-              <p className="text-gray-600 mt-1">
+              <p className="text-[#051e50] mt-1">
                 Veiligheidsbladen en artikel informatie
               </p>
             </div>
