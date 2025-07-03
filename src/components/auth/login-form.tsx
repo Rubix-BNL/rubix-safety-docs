@@ -130,22 +130,6 @@ export default function LoginForm() {
                 "Account Aanmaken"
               )}
             </Button>
-
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={() => {
-                  setMode(mode === "login" ? "signup" : "login");
-                  setError(null);
-                }}
-                className="text-sm text-[#051e50] hover:text-[#051e50]/80 font-medium"
-                disabled={loading}
-              >
-                {mode === "login"
-                  ? "Nog geen account? Maak er een aan"
-                  : "Al een account? Log in"}
-              </button>
-            </div>
           </form>
         </Card>
 
