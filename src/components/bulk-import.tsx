@@ -81,13 +81,17 @@ export default function BulkImport() {
     if (!file) return;
 
     if (!file.name.toLowerCase().endsWith(".csv")) {
-      alert("Alleen CSV bestanden zijn toegestaan");
+      alert(
+        "❌ Bestand niet toegestaan\n\nAlleen CSV bestanden kunnen worden geïmporteerd.\nKies een bestand met de extensie .csv",
+      );
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
       // 5MB limit
-      alert("Bestand mag maximaal 5MB zijn");
+      alert(
+        "❌ Bestand te groot\n\nHet geselecteerde bestand is groter dan 5MB.\nKies een kleiner bestand om door te gaan.",
+      );
       return;
     }
 
@@ -104,7 +108,9 @@ export default function BulkImport() {
         setPreviewData(parsedData.slice(0, 10)); // Show first 10 rows
         setShowPreview(true);
       } catch (error: any) {
-        alert(`Fout bij lezen bestand: ${error.message}`);
+        alert(
+          `❌ Bestand kan niet worden gelezen\n\nEr is een probleem opgetreden bij het lezen van het CSV bestand.\n\nFoutmelding: ${error.message}\n\nControleer of het bestand correct is opgeslagen als CSV.`,
+        );
         setSelectedFile(null);
       }
     };
@@ -203,7 +209,9 @@ export default function BulkImport() {
           setImportResult(result);
           console.log("Import completed:", result);
         } catch (parseError: any) {
-          alert(`Fout bij verwerken bestand: ${parseError.message}`);
+          alert(
+            `❌ Bestand verwerking mislukt\n\nHet CSV bestand kon niet worden verwerkt.\n\nMogelijke oorzaken:\n• Verkeerde bestandsindeling\n• Ontbrekende verplichte kolommen\n• Ongeldige gegevens\n\nFoutmelding: ${parseError.message}`,
+          );
         } finally {
           setIsImporting(false);
         }
@@ -212,7 +220,9 @@ export default function BulkImport() {
       reader.readAsText(selectedFile);
     } catch (error: any) {
       console.error("Import failed:", error);
-      alert(`Import mislukt: ${error.message}`);
+      alert(
+        `❌ Import mislukt\n\nDe artikelen konden niet worden geïmporteerd in de database.\n\nFoutmelding: ${error.message}\n\nProbeer het opnieuw of neem contact op met de beheerder.`,
+      );
       setIsImporting(false);
     }
   }

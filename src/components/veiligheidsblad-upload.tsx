@@ -52,13 +52,17 @@ export default function VeiligheidsbladUpload({
         !file.type.includes("word") &&
         !file.type.includes("document")
       ) {
-        alert("Alleen PDF en Word documenten zijn toegestaan");
+        alert(
+          "❌ Bestandstype niet ondersteund\n\nAlleen PDF en Word documenten (.pdf, .doc, .docx) kunnen worden geüpload.\n\nKies een geldig documentbestand.",
+        );
         return;
       }
 
       // Validate file size (max 10MB)
       if (file.size > 10 * 1024 * 1024) {
-        alert("Bestand mag maximaal 10MB zijn");
+        alert(
+          "❌ Bestand te groot\n\nHet geselecteerde bestand is groter dan 10MB.\n\nComprimeer het bestand of kies een kleinere versie.",
+        );
         return;
       }
 
@@ -93,7 +97,7 @@ export default function VeiligheidsbladUpload({
           JSON.stringify(versionError, null, 2),
         );
         alert(
-          `Fout bij uploaden: ${versionError.message || "Onbekende fout"}\n\nDetails: ${versionError.error || versionError.statusText || "Geen extra details"}\n\nMogelijke oorzaak: Supabase Storage bucket bestaat niet of geen toegang`,
+          `❌ Upload mislukt\n\nHet veiligheidsblad kon niet worden geüpload naar de server.\n\nFoutmelding: ${versionError.message || "Onbekende fout"}\n\nMogelijke oorzaken:\n• Geen internetverbinding\n• Server tijdelijk niet beschikbaar\n• Bestand al bestaat\n\nProbeer het opnieuw of neem contact op met de beheerder.`,
         );
         return;
       }
@@ -134,7 +138,7 @@ export default function VeiligheidsbladUpload({
           JSON.stringify(dbError, null, 2),
         );
         alert(
-          `Fout bij opslaan in database: ${dbError.message || "Onbekende fout"}\n\nCode: ${dbError.code || "N/A"}\nDetails: ${dbError.details || "N/A"}`,
+          `❌ Database fout\n\nHet bestand is geüpload maar kon niet worden geregistreerd in de database.\n\nFoutmelding: ${dbError.message || "Onbekende fout"}\n\nNeem contact op met de beheerder om dit probleem op te lossen.`,
         );
         return;
       }
@@ -144,7 +148,7 @@ export default function VeiligheidsbladUpload({
     } catch (err: unknown) {
       console.error("Upload error:", err);
       alert(
-        `Er is een onverwachte fout opgetreden: ${err?.message || err?.toString() || "Onbekende fout"}`,
+        `❌ Onverwachte fout\n\nEr is een onverwachte fout opgetreden tijdens het uploaden.\n\nFoutmelding: ${err?.message || err?.toString() || "Onbekende fout"}\n\nProbeer het opnieuw of neem contact op met de beheerder.`,
       );
     } finally {
       setIsUploading(false);

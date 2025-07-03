@@ -72,15 +72,7 @@ function HomeContent() {
   return (
     <div className="max-w-7xl mx-auto p-6">
       {/* Action Buttons */}
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <Button
-            asChild
-            className="bg-[#051e50] hover:bg-[#051e50]/90 text-white font-medium"
-          >
-            <Link href="/bulk">Bulk Import/Export</Link>
-          </Button>
-        </div>
+      <div className="flex justify-end items-center mb-6">
         <Button
           onClick={() => setShowForm(!showForm)}
           className="bg-[#051e50] hover:bg-[#051e50]/90 text-white font-medium"
@@ -266,7 +258,6 @@ export default function HomePage() {
     <ProtectedLayout
       title="Safety Documentation"
       subtitle="Veiligheidsbladen en artikel informatie"
-      showAdminLink={true}
     >
       <HomeContent />
     </ProtectedLayout>

@@ -69,6 +69,12 @@ export default function ProtectedLayout({
                 </Button>
               )}
               <Button
+                asChild
+                className="bg-[#051e50] hover:bg-[#051e50]/90 text-white font-medium"
+              >
+                <Link href="/bulk">Bulk Import/Export</Link>
+              </Button>
+              <Button
                 onClick={signOut}
                 variant="outline"
                 className="border-[#051e50] text-[#051e50] hover:bg-[#051e50] hover:text-white"

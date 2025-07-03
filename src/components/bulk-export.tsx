@@ -60,7 +60,9 @@ export default function BulkExport() {
       if (error) throw error;
 
       if (!data || data.length === 0) {
-        alert("Geen artikelen gevonden om te exporteren");
+        alert(
+          "ℹ️ Geen gegevens beschikbaar\n\nEr zijn momenteel geen artikelen in de database om te exporteren.\n\nVoeg eerst artikelen toe voordat u kunt exporteren.",
+        );
         return;
       }
 
@@ -104,7 +106,9 @@ export default function BulkExport() {
       if (error) throw error;
 
       if (!data || data.length === 0) {
-        alert("Geen veiligheidsbladen gevonden om te exporteren");
+        alert(
+          "ℹ️ Geen gegevens beschikbaar\n\nEr zijn momenteel geen veiligheidsbladen in de database om te exporteren.\n\nUpload eerst veiligheidsbladen voordat u kunt exporteren.",
+        );
         return;
       }
 
@@ -138,20 +142,26 @@ export default function BulkExport() {
 
       if (exportType === "artikelen") {
         exportedCount = (await exportArtikelen()) || 0;
-        alert(`✅ Succesvol ${exportedCount} artikelen geëxporteerd`);
+        alert(
+          `✅ Export voltooid\n\n${exportedCount} artikelen zijn succesvol geëxporteerd naar een CSV bestand.\n\nHet bestand is automatisch gedownload naar uw Downloads map.`,
+        );
       } else if (exportType === "veiligheidsbladen") {
         exportedCount = (await exportVeiligheidsbladen()) || 0;
-        alert(`✅ Succesvol ${exportedCount} veiligheidsbladen geëxporteerd`);
+        alert(
+          `✅ Export voltooid\n\n${exportedCount} veiligheidsbladen zijn succesvol geëxporteerd naar een CSV bestand.\n\nHet bestand is automatisch gedownload naar uw Downloads map.`,
+        );
       } else if (exportType === "alles") {
         const artikelCount = (await exportArtikelen()) || 0;
         const vbCount = (await exportVeiligheidsbladen()) || 0;
         alert(
-          `✅ Succesvol geëxporteerd:\n- ${artikelCount} artikelen\n- ${vbCount} veiligheidsbladen`,
+          `✅ Export voltooid\n\nSuccesvol geëxporteerd:\n• ${artikelCount} artikelen\n• ${vbCount} veiligheidsbladen\n\nBeide bestanden zijn automatisch gedownload naar uw Downloads map.`,
         );
       }
     } catch (error: any) {
       console.error("Export failed:", error);
-      alert(`❌ Export mislukt: ${error.message || "Onbekende fout"}`);
+      alert(
+        `❌ Export mislukt\n\nEr is een fout opgetreden tijdens het exporteren van de gegevens.\n\nFoutmelding: ${error.message || "Onbekende fout"}\n\nProbeer het opnieuw of neem contact op met de beheerder.`,
+      );
     } finally {
       setIsExporting(false);
     }
