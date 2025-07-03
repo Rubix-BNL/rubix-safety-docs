@@ -638,6 +638,13 @@ export default function TestSupabasePage() {
           >
             {loadingSchemas ? "Schema laden..." : "Bekijk Schema's"}
           </button>
+          <button
+            onClick={inspectBuckets}
+            disabled={loadingBuckets || !status?.connected}
+            className="ml-4 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+          >
+            {loadingBuckets ? "Buckets laden..." : "Bekijk Storage Buckets"}
+          </button>
           <a
             href="/"
             className="ml-4 text-blue-600 hover:text-blue-800 font-medium"
