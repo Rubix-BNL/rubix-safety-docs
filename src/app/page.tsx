@@ -68,27 +68,32 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-[#ffd700] border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                Rubix Safety Documentation
+              <h1 className="text-2xl font-bold text-[#051e50] flex items-center">
+                <img
+                  src="/RUBIX_logo_blue.svg"
+                  alt="Rubix"
+                  className="h-[30px] w-[106px] mr-3"
+                />
+                Safety Documentation
               </h1>
-              <p className="text-gray-600 mt-1">
+              <p className="text-[#051e50] mt-1">
                 Veiligheidsbladen en artikel informatie
               </p>
             </div>
             <div className="flex items-center space-x-4">
               <a
-                href="/test-supabase"
-                className="text-gray-600 hover:text-gray-800 font-medium"
+                href="/bulk"
+                className="text-[#051e50] hover:text-[#051e50] font-medium"
               >
-                Test Database
+                Bulk Import/Export
               </a>
               <button
                 onClick={() => setShowForm(!showForm)}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                className="bg-[#051e50] hover:bg-opacity-90 text-white font-medium py-2 px-4 rounded-lg transition-colors"
               >
                 {showForm ? "Annuleren" : "Nieuw Artikel"}
               </button>
@@ -100,7 +105,7 @@ export default function HomePage() {
       <div className="max-w-7xl mx-auto p-6">
         {showForm && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h2 className="text-xl font-semibold mb-4">
+            <h2 className="text-xl font-semibold mb-4 text-[#051e50]">
               Nieuw Artikel Toevoegen
             </h2>
             <ArtikelForm
@@ -149,7 +154,7 @@ export default function HomePage() {
                     className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
                   />
                   <svg
-                    className="absolute left-3 top-2.5 h-5 w-5 text-gray-400"
+                    className="absolute left-3 top-2.5 h-5 w-5 text-[#051e50]"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -162,16 +167,16 @@ export default function HomePage() {
                     />
                   </svg>
                 </div>
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-[#051e50]">
                   {filteredArtikelen.length} van {artikelen.length} artikelen
                 </span>
               </div>
 
               <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-600">Weergave:</span>
+                <span className="text-sm text-[#051e50]">Weergave:</span>
                 <button
                   onClick={() => setViewMode("list")}
-                  className={`p-2 rounded ${viewMode === "list" ? "bg-blue-100 text-blue-600" : "text-gray-400 hover:text-gray-600"}`}
+                  className={`p-2 rounded ${viewMode === "list" ? "bg-blue-100 text-blue-600" : "text-[#051e50] hover:text-[#051e50]"}`}
                 >
                   <svg
                     className="w-5 h-5"
@@ -189,7 +194,7 @@ export default function HomePage() {
                 </button>
                 <button
                   onClick={() => setViewMode("cards")}
-                  className={`p-2 rounded ${viewMode === "cards" ? "bg-blue-100 text-blue-600" : "text-gray-400 hover:text-gray-600"}`}
+                  className={`p-2 rounded ${viewMode === "cards" ? "bg-blue-100 text-blue-600" : "text-[#051e50] hover:text-[#051e50]"}`}
                 >
                   <svg
                     className="w-5 h-5"
@@ -212,17 +217,17 @@ export default function HomePage() {
             {loading ? (
               <div className="flex items-center justify-center py-12">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                <span className="ml-3 text-gray-600">Artikelen laden...</span>
+                <span className="ml-3 text-[#051e50]">Artikelen laden...</span>
               </div>
             ) : filteredArtikelen.length === 0 ? (
               <div className="text-center py-12">
                 {searchTerm ? (
-                  <p className="text-gray-500 text-lg">
+                  <p className="text-[#051e50] text-lg">
                     Geen artikelen gevonden voor "{searchTerm}"
                   </p>
                 ) : (
                   <div>
-                    <p className="text-gray-500 text-lg mb-4">
+                    <p className="text-[#051e50] text-lg mb-4">
                       Nog geen artikelen toegevoegd
                     </p>
                     <button

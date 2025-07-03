@@ -16,10 +16,62 @@ export default function ArtikelList({ artikelen, onUpdate }: ArtikelListProps) {
     [key: string]: Veiligheidsblad[];
   }>({});
 
-  async function loadVeiligheidsbladen(artikelId: string) {
-    if (veiligheidsbladenMap[artikelId]) return; // Already loaded
+  // Load veiligheidsbladen for all artikelen when component mounts or artikelen change
+  useEffect(() => {
+    async function loadAllVeiligheidsbladen() {
+      if (artikelen.length === 0) return;
+
+      console.log(
+        `Loading veiligheidsbladen for ${artikelen.length} artikelen`,
+      );
+
+      try {
+        const artikelIds = artikelen.map((artikel) => artikel.id);
+
+        const { data, error } = await supabase
+          .from("veiligheidsbladen")
+          .select("*")
+          .in("artikel_id", artikelIds)
+          .order("id", { ascending: false });
+
+        if (!error && data) {
+          console.log(`Found ${data.length} total veiligheidsbladen`);
+
+          // Group by artikel_id
+          const grouped = data.reduce(
+            (acc, vb) => {
+              if (!acc[vb.artikel_id]) {
+                acc[vb.artikel_id] = [];
+              }
+              acc[vb.artikel_id].push(vb);
+              return acc;
+            },
+            {} as { [key: string]: Veiligheidsblad[] },
+          );
+
+          setVeiligheidsbladenMap(grouped);
+        } else if (error) {
+          console.error("Error loading all veiligheidsbladen:", error);
+        }
+      } catch (err) {
+        console.error("Error loading all veiligheidsbladen:", err);
+      }
+    }
+
+    loadAllVeiligheidsbladen();
+  }, [artikelen]);
+
+  async function loadVeiligheidsbladen(
+    artikelId: string,
+    forceRefresh = false,
+  ) {
+    if (veiligheidsbladenMap[artikelId] && !forceRefresh) return; // Already loaded
 
     try {
+      console.log(
+        `Loading veiligheidsbladen for artikel ${artikelId}${forceRefresh ? " (forced refresh)" : ""}`,
+      );
+
       const { data, error } = await supabase
         .from("veiligheidsbladen")
         .select("*")
@@ -27,10 +79,16 @@ export default function ArtikelList({ artikelen, onUpdate }: ArtikelListProps) {
         .order("id", { ascending: false });
 
       if (!error && data) {
+        console.log(
+          `Found ${data.length} veiligheidsbladen for artikel ${artikelId}:`,
+          data,
+        );
         setVeiligheidsbladenMap((prev) => ({
           ...prev,
           [artikelId]: data,
         }));
+      } else if (error) {
+        console.error("Error loading veiligheidsbladen:", error);
       }
     } catch (err) {
       console.error("Error loading veiligheidsbladen:", err);
@@ -64,14 +122,20 @@ export default function ArtikelList({ artikelen, onUpdate }: ArtikelListProps) {
     });
   }
 
-  function handleVeiligheidsbladUpdate(artikelId: string) {
-    // Reload veiligheidsbladen for this artikel
+  async function handleVeiligheidsbladUpdate(artikelId: string) {
+    console.log(`Updating veiligheidsbladen for artikel ${artikelId}`);
+
+    // Clear cache for this artikel
     setVeiligheidsbladenMap((prev) => {
       const updated = { ...prev };
       delete updated[artikelId];
       return updated;
     });
-    loadVeiligheidsbladen(artikelId);
+
+    // Force reload veiligheidsbladen for this artikel
+    await loadVeiligheidsbladen(artikelId, true);
+
+    // Also refresh the main artikel list to get any updates
     onUpdate();
   }
 
@@ -79,18 +143,18 @@ export default function ArtikelList({ artikelen, onUpdate }: ArtikelListProps) {
     <div className="bg-white rounded-lg shadow overflow-hidden">
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <thead className="bg-[#051e50]">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                 Artikel
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                 Referenties
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                 Veiligheidsbladen
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                 Datum
               </th>
               <th className="relative px-6 py-3">
@@ -212,14 +276,53 @@ export default function ArtikelList({ artikelen, onUpdate }: ArtikelListProps) {
                                       {formatDate(veiligheidsblad.geupload_op)}
                                     </div>
                                     <div className="flex space-x-2">
-                                      <a
-                                        href={`${supabase.storage.from("safety-docs").getPublicUrl(veiligheidsblad.storage_path).data.publicUrl}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                                      <button
+                                        onClick={async () => {
+                                          console.log(
+                                            "Storage path:",
+                                            veiligheidsblad.storage_path,
+                                          );
+
+                                          // Try signed URL for better compatibility
+                                          const { data: signedUrl, error } =
+                                            await supabase.storage
+                                              .from("safety-docs")
+                                              .createSignedUrl(
+                                                veiligheidsblad.storage_path,
+                                                3600,
+                                              ); // 1 hour expiry
+
+                                          if (error) {
+                                            console.error(
+                                              "Error creating signed URL:",
+                                              error,
+                                            );
+                                            // Fallback to public URL
+                                            const publicUrl = supabase.storage
+                                              .from("safety-docs")
+                                              .getPublicUrl(
+                                                veiligheidsblad.storage_path,
+                                              ).data.publicUrl;
+                                            console.log(
+                                              "Using public URL:",
+                                              publicUrl,
+                                            );
+                                            window.open(publicUrl, "_blank");
+                                          } else {
+                                            console.log(
+                                              "Using signed URL:",
+                                              signedUrl.signedUrl,
+                                            );
+                                            window.open(
+                                              signedUrl.signedUrl,
+                                              "_blank",
+                                            );
+                                          }
+                                        }}
+                                        className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-[#051e50] hover:bg-opacity-90 transition-colors"
                                       >
                                         Bekijken
-                                      </a>
+                                      </button>
                                       <VeiligheidsbladUpload
                                         artikelId={artikel.id}
                                         taal={taal.code}
@@ -230,7 +333,7 @@ export default function ArtikelList({ artikelen, onUpdate }: ArtikelListProps) {
                                           )
                                         }
                                         trigger={
-                                          <button className="text-xs text-green-600 hover:text-green-800 font-medium">
+                                          <button className="inline-flex items-center px-3 py-1.5 border border-[#ffd700] text-xs font-medium rounded-md text-[#051e50] bg-[#ffd700] hover:bg-opacity-90 transition-colors">
                                             Update
                                           </button>
                                         }

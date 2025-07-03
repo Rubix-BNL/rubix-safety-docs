@@ -142,14 +142,47 @@ export default function ArtikelCard({ artikel, onUpdate }: ArtikelCardProps) {
                         </span>
                       </div>
                       <div className="flex space-x-2">
-                        <a
-                          href={`${supabase.storage.from("safety-docs").getPublicUrl(latestVeiligheidsblad.storage_path).data.publicUrl}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <button
+                          onClick={async () => {
+                            console.log(
+                              "Storage path:",
+                              latestVeiligheidsblad.storage_path,
+                            );
+
+                            // Try signed URL for better compatibility
+                            const { data: signedUrl, error } =
+                              await supabase.storage
+                                .from("safety-docs")
+                                .createSignedUrl(
+                                  latestVeiligheidsblad.storage_path,
+                                  3600,
+                                ); // 1 hour expiry
+
+                            if (error) {
+                              console.error(
+                                "Error creating signed URL:",
+                                error,
+                              );
+                              // Fallback to public URL
+                              const publicUrl = supabase.storage
+                                .from("safety-docs")
+                                .getPublicUrl(
+                                  latestVeiligheidsblad.storage_path,
+                                ).data.publicUrl;
+                              console.log("Using public URL:", publicUrl);
+                              window.open(publicUrl, "_blank");
+                            } else {
+                              console.log(
+                                "Using signed URL:",
+                                signedUrl.signedUrl,
+                              );
+                              window.open(signedUrl.signedUrl, "_blank");
+                            }
+                          }}
                           className="text-xs text-blue-600 hover:text-blue-800 font-medium"
                         >
                           Bekijken
-                        </a>
+                        </button>
                         <VeiligheidsbladUpload
                           artikelId={artikel.id}
                           taal={taal.code}

@@ -33,6 +33,8 @@ export default function TestSupabasePage() {
     [key: string]: ColumnInfo[];
   }>({});
   const [loadingSchemas, setLoadingSchemas] = useState(false);
+  const [buckets, setBuckets] = useState<any[]>([]);
+  const [loadingBuckets, setLoadingBuckets] = useState(false);
 
   useEffect(() => {
     async function testConnection() {
@@ -249,6 +251,56 @@ export default function TestSupabasePage() {
     console.log("Final schemas:", schemas);
     setTableSchemas(schemas);
     setLoadingSchemas(false);
+  }
+
+  async function inspectBuckets() {
+    setLoadingBuckets(true);
+    try {
+      console.log("Testing storage bucket access...");
+
+      // Test direct toegang tot safety-docs bucket
+      const { data: files, error } = await supabase.storage
+        .from("safety-docs")
+        .list("", { limit: 1 });
+
+      if (error) {
+        console.error("Error accessing safety-docs bucket:", error);
+        setBuckets([
+          {
+            name: "safety-docs",
+            accessible: false,
+            error: error.message,
+            id: "test",
+            created_at: new Date().toISOString(),
+          },
+        ]);
+      } else {
+        console.log("Safety-docs bucket accessible, files:", files);
+        setBuckets([
+          {
+            name: "safety-docs",
+            accessible: true,
+            files: files?.length || 0,
+            id: "safety-docs",
+            created_at: new Date().toISOString(),
+            public: true, // Assume public based on successful access
+          },
+        ]);
+      }
+    } catch (err: any) {
+      console.error("Bucket test failed:", err);
+      setBuckets([
+        {
+          name: "safety-docs",
+          accessible: false,
+          error: err.message || "Onbekende fout",
+          id: "test",
+          created_at: new Date().toISOString(),
+        },
+      ]);
+    } finally {
+      setLoadingBuckets(false);
+    }
   }
 
   return (
@@ -491,6 +543,80 @@ export default function TestSupabasePage() {
           </div>
         )}
 
+        {buckets.length > 0 && (
+          <div className="bg-gray-50 rounded-lg p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-4 text-gray-800">
+              Storage Buckets
+            </h2>
+            {buckets[0]?.error ? (
+              <div className="bg-red-50 border border-red-200 rounded p-4">
+                <p className="text-red-800 font-medium">
+                  Fout bij ophalen buckets:
+                </p>
+                <p className="text-red-700 text-sm">{buckets[0].error}</p>
+              </div>
+            ) : buckets.length === 0 ? (
+              <p className="text-gray-500 italic">
+                Geen storage buckets gevonden
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {buckets.map((bucket, index) => (
+                  <div
+                    key={index}
+                    className="bg-white border border-gray-200 rounded p-4"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-medium text-gray-900">
+                          {bucket.name}
+                        </h3>
+                        <p className="text-sm text-gray-600">ID: {bucket.id}</p>
+                        {bucket.public && (
+                          <span className="inline-block mt-1 px-2 py-1 bg-green-100 text-green-800 text-xs rounded">
+                            Publiek
+                          </span>
+                        )}
+                        {!bucket.public && (
+                          <span className="inline-block mt-1 px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">
+                            Privé
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        Gemaakt:{" "}
+                        {new Date(bucket.created_at).toLocaleDateString(
+                          "nl-NL",
+                        )}
+                      </div>
+                    </div>
+                    {bucket.name === "safety-docs" && (
+                      <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded">
+                        <p className="text-green-800 text-sm font-medium">
+                          ✓ Dit is de bucket die de applicatie gebruikt!
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {!buckets.some((b) => b.name === "safety-docs") && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded p-4">
+                    <p className="text-yellow-800 font-medium">
+                      ⚠️ Bucket "safety-docs" niet gevonden
+                    </p>
+                    <p className="text-yellow-700 text-sm mt-1">
+                      De applicatie verwacht een bucket genaamd
+                      &quot;safety-docs&quot; voor het opslaan van
+                      veiligheidsbladen. Je kunt deze aanmaken in je Supabase
+                      dashboard onder Storage &gt; Buckets.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
           <h3 className="text-lg font-semibold mb-3 text-blue-900">
             Configuratie Checklist
@@ -539,6 +665,13 @@ export default function TestSupabasePage() {
             className="ml-4 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-lg transition-colors"
           >
             {loadingSchemas ? "Schema laden..." : "Bekijk Schema's"}
+          </button>
+          <button
+            onClick={inspectBuckets}
+            disabled={loadingBuckets || !status?.connected}
+            className="ml-4 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+          >
+            {loadingBuckets ? "Buckets laden..." : "Bekijk Storage Buckets"}
           </button>
           <a
             href="/"
