@@ -212,14 +212,53 @@ export default function ArtikelList({ artikelen, onUpdate }: ArtikelListProps) {
                                       {formatDate(veiligheidsblad.geupload_op)}
                                     </div>
                                     <div className="flex space-x-2">
-                                      <a
-                                        href={`${supabase.storage.from("safety-docs").getPublicUrl(veiligheidsblad.storage_path).data.publicUrl}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
+                                      <button
+                                        onClick={async () => {
+                                          console.log(
+                                            "Storage path:",
+                                            veiligheidsblad.storage_path,
+                                          );
+
+                                          // Try signed URL for better compatibility
+                                          const { data: signedUrl, error } =
+                                            await supabase.storage
+                                              .from("safety-docs")
+                                              .createSignedUrl(
+                                                veiligheidsblad.storage_path,
+                                                3600,
+                                              ); // 1 hour expiry
+
+                                          if (error) {
+                                            console.error(
+                                              "Error creating signed URL:",
+                                              error,
+                                            );
+                                            // Fallback to public URL
+                                            const publicUrl = supabase.storage
+                                              .from("safety-docs")
+                                              .getPublicUrl(
+                                                veiligheidsblad.storage_path,
+                                              ).data.publicUrl;
+                                            console.log(
+                                              "Using public URL:",
+                                              publicUrl,
+                                            );
+                                            window.open(publicUrl, "_blank");
+                                          } else {
+                                            console.log(
+                                              "Using signed URL:",
+                                              signedUrl.signedUrl,
+                                            );
+                                            window.open(
+                                              signedUrl.signedUrl,
+                                              "_blank",
+                                            );
+                                          }
+                                        }}
                                         className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-[#051e50] hover:bg-opacity-90 transition-colors"
                                       >
                                         Bekijken
-                                      </a>
+                                      </button>
                                       <VeiligheidsbladUpload
                                         artikelId={artikel.id}
                                         taal={taal.code}
