@@ -9,6 +9,18 @@ export interface Artikel {
   updated_at: string;
 }
 
+export interface User {
+  id: string;
+  email: string;
+  role?: "admin" | "user";
+  created_at: string;
+}
+
+export interface AuthState {
+  user: User | null;
+  loading: boolean;
+}
+
 export interface Veiligheidsblad {
   id: string;
   artikel_id: string;

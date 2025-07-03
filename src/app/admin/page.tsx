@@ -5,8 +5,10 @@ import { supabase } from "@/lib/supabase";
 import { Artikel } from "@/lib/types";
 import ArtikelCard from "@/components/artikel-card";
 import ArtikelForm from "@/components/artikel-form";
+import AdminLayout from "@/components/auth/admin-layout";
+import { Button } from "@/components/ui/button";
 
-export default function AdminPage() {
+function AdminContent() {
   const [artikelen, setArtikelen] = useState<Artikel[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -64,30 +66,30 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="p-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              Admin Dashboard
-            </h1>
+            <h2 className="text-2xl font-bold text-[#051e50]">
+              Artikel Beheer
+            </h2>
             <p className="text-gray-600 mt-1">
               Beheer artikelen en veiligheidsbladen
             </p>
           </div>
-          <button
+          <Button
             onClick={() => setShowForm(!showForm)}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+            className="bg-[#051e50] hover:bg-[#051e50]/90 text-white font-medium"
           >
             {showForm ? "Annuleren" : "Nieuw Artikel"}
-          </button>
+          </Button>
         </div>
 
         {showForm && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h2 className="text-xl font-semibold mb-4">
+            <h3 className="text-xl font-semibold mb-4 text-[#051e50]">
               Nieuw Artikel Toevoegen
-            </h2>
+            </h3>
             <ArtikelForm
               onSuccess={handleArtikelAdded}
               onCancel={() => setShowForm(false)}
@@ -104,12 +106,13 @@ export default function AdminPage() {
               {error}
             </pre>
             <div className="mt-4">
-              <button
+              <Button
                 onClick={loadArtikelen}
-                className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors mr-4"
+                variant="destructive"
+                className="mr-4"
               >
                 Opnieuw proberen
-              </button>
+              </Button>
               <a
                 href="/test-supabase"
                 className="text-red-600 hover:text-red-800 font-medium"
@@ -122,8 +125,8 @@ export default function AdminPage() {
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <span className="ml-3 text-gray-600">Artikelen laden...</span>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#051e50]"></div>
+            <span className="ml-3 text-[#051e50]">Artikelen laden...</span>
           </div>
         ) : error ? null : (
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -132,12 +135,13 @@ export default function AdminPage() {
                 <p className="text-gray-500 text-lg">
                   Nog geen artikelen toegevoegd
                 </p>
-                <button
+                <Button
+                  variant="link"
                   onClick={() => setShowForm(true)}
-                  className="mt-4 text-blue-600 hover:text-blue-800 font-medium"
+                  className="mt-4 text-[#051e50] hover:text-[#051e50]/80 p-0 h-auto"
                 >
                   Voeg je eerste artikel toe
-                </button>
+                </Button>
               </div>
             ) : (
               artikelen.map((artikel) => (
@@ -152,5 +156,13 @@ export default function AdminPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function AdminPage() {
+  return (
+    <AdminLayout>
+      <AdminContent />
+    </AdminLayout>
   );
 }
