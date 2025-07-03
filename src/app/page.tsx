@@ -266,7 +266,6 @@ export default function HomePage() {
     <ProtectedLayout
       title="Safety Documentation"
       subtitle="Veiligheidsbladen en artikel informatie"
-      showAdminLink={true}
     >
       <HomeContent />
     </ProtectedLayout>
