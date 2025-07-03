@@ -32,14 +32,18 @@ export default function ArtikelForm({ onSuccess, onCancel }: ArtikelFormProps) {
 
       if (error) {
         console.error("Error saving artikel:", error);
-        alert("Fout bij opslaan: " + error.message);
+        alert(
+          `❌ Opslaan mislukt\n\nHet artikel kon niet worden opgeslagen in de database.\n\nFoutmelding: ${error.message}\n\nControleer uw gegevens en probeer het opnieuw.`,
+        );
         return;
       }
 
       onSuccess(data);
     } catch (err) {
       console.error("Error:", err);
-      alert("Er is een fout opgetreden");
+      alert(
+        "❌ Onverwachte fout\n\nEr is een onverwachte fout opgetreden bij het verwerken van uw verzoek.\n\nProbeer het opnieuw of neem contact op met de beheerder.",
+      );
     } finally {
       setSaving(false);
     }
