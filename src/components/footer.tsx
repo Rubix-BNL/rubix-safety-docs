@@ -46,14 +46,6 @@ export default function Footer() {
                   Bulk Import/Export
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/admin"
-                  className="text-gray-300 hover:text-white text-sm transition-colors"
-                >
-                  Admin
-                </Link>
-              </li>
             </ul>
           </div>
 
