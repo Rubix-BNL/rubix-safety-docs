@@ -522,18 +522,27 @@ export default function TestSupabasePage() {
             </h2>
             {buckets[0]?.error ? (
               <div className="bg-red-50 border border-red-200 rounded p-4">
-                <p className="text-red-800 font-medium">Fout bij ophalen buckets:</p>
+                <p className="text-red-800 font-medium">
+                  Fout bij ophalen buckets:
+                </p>
                 <p className="text-red-700 text-sm">{buckets[0].error}</p>
               </div>
             ) : buckets.length === 0 ? (
-              <p className="text-gray-500 italic">Geen storage buckets gevonden</p>
+              <p className="text-gray-500 italic">
+                Geen storage buckets gevonden
+              </p>
             ) : (
               <div className="space-y-3">
                 {buckets.map((bucket, index) => (
-                  <div key={index} className="bg-white border border-gray-200 rounded p-4">
+                  <div
+                    key={index}
+                    className="bg-white border border-gray-200 rounded p-4"
+                  >
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="font-medium text-gray-900">{bucket.name}</h3>
+                        <h3 className="font-medium text-gray-900">
+                          {bucket.name}
+                        </h3>
                         <p className="text-sm text-gray-600">ID: {bucket.id}</p>
                         {bucket.public && (
                           <span className="inline-block mt-1 px-2 py-1 bg-green-100 text-green-800 text-xs rounded">
@@ -547,10 +556,13 @@ export default function TestSupabasePage() {
                         )}
                       </div>
                       <div className="text-sm text-gray-500">
-                        Gemaakt: {new Date(bucket.created_at).toLocaleDateString('nl-NL')}
+                        Gemaakt:{" "}
+                        {new Date(bucket.created_at).toLocaleDateString(
+                          "nl-NL",
+                        )}
                       </div>
                     </div>
-                    {bucket.name === 'safety-docs' && (
+                    {bucket.name === "safety-docs" && (
                       <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded">
                         <p className="text-green-800 text-sm font-medium">
                           ✓ Dit is de bucket die de applicatie gebruikt!
@@ -559,14 +571,16 @@ export default function TestSupabasePage() {
                     )}
                   </div>
                 ))}
-                {!buckets.some(b => b.name === 'safety-docs') && (
+                {!buckets.some((b) => b.name === "safety-docs") && (
                   <div className="bg-yellow-50 border border-yellow-200 rounded p-4">
                     <p className="text-yellow-800 font-medium">
                       ⚠️ Bucket "safety-docs" niet gevonden
                     </p>
                     <p className="text-yellow-700 text-sm mt-1">
-                      De applicatie verwacht een bucket genaamd "safety-docs" voor het opslaan van veiligheidsbladen.
-                      Je kunt deze aanmaken in je Supabase dashboard under Storage > Buckets.
+                      De applicatie verwacht een bucket genaamd
+                      &quot;safety-docs&quot; voor het opslaan van
+                      veiligheidsbladen. Je kunt deze aanmaken in je Supabase
+                      dashboard onder Storage &gt; Buckets.
                     </p>
                   </div>
                 )}
