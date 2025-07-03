@@ -115,11 +115,6 @@ export default function VeiligheidsbladUpload({
         // Continue anyway, versioned upload succeeded
       }
 
-      // Get public URLs
-      const { data: versionUrl } = supabase.storage
-        .from("safety-docs")
-        .getPublicUrl(versionPath);
-
       // Save to database
       const { error: dbError } = await supabase
         .from("veiligheidsbladen")
