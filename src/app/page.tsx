@@ -7,10 +7,11 @@ import { Artikel } from "@/lib/types";
 import ArtikelCard from "@/components/artikel-card";
 import ArtikelList from "@/components/artikel-list";
 import ArtikelForm from "@/components/artikel-form";
+import ProtectedLayout from "@/components/auth/protected-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-export default function HomePage() {
+function HomeContent() {
   const [artikelen, setArtikelen] = useState<Artikel[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -27,7 +28,10 @@ export default function HomePage() {
     try {
       console.log("Loading artikelen...");
 
-      const { data, error } = await supabase.from("artikelen").select("*").order("id", { ascending: false });
+      const { data, error } = await supabase
+        .from("artikelen")
+        .select("*")
+        .order("id", { ascending: false });
 
       if (error) {
         console.error("Full error object:", JSON.stringify(error, null, 2));
@@ -56,126 +60,215 @@ export default function HomePage() {
     (artikel) =>
       artikel.naam.toLowerCase().includes(searchTerm.toLowerCase()) ||
       artikel.unieke_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      artikel.referentie_rubix?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      artikel.referentie_fabrikant?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      artikel.ean?.toLowerCase().includes(searchTerm.toLowerCase())
+      artikel.referentie_rubix
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      artikel.referentie_fabrikant
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      artikel.ean?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-[#ffd700] border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold text-[#051e50] flex items-center">
-                <img src="/RUBIX_logo_blue.svg" alt="Rubix" className="h-[30px] w-[106px] mr-3" />
-                Safety Documentation
-              </h1>
-              <p className="text-[#051e50] mt-1">Veiligheidsbladen en artikel informatie</p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Button asChild className="bg-[#051e50] hover:bg-[#051e50]/90 text-white font-medium">
-                <Link href="/bulk">Bulk Import/Export</Link>
-              </Button>
-              <Button onClick={() => setShowForm(!showForm)} className="bg-[#051e50] hover:bg-[#051e50]/90 text-white font-medium">
-                {showForm ? "Annuleren" : "Nieuw Artikel"}
-              </Button>
-            </div>
+    <div className="max-w-7xl mx-auto p-6">
+      {/* Action Buttons */}
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <Button
+            asChild
+            className="bg-[#051e50] hover:bg-[#051e50]/90 text-white font-medium"
+          >
+            <Link href="/bulk">Bulk Import/Export</Link>
+          </Button>
+        </div>
+        <Button
+          onClick={() => setShowForm(!showForm)}
+          className="bg-[#051e50] hover:bg-[#051e50]/90 text-white font-medium"
+        >
+          {showForm ? "Annuleren" : "Nieuw Artikel"}
+        </Button>
+      </div>
+
+      {showForm && (
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+          <h2 className="text-xl font-semibold mb-4 text-[#051e50]">
+            Nieuw Artikel Toevoegen
+          </h2>
+          <ArtikelForm
+            onSuccess={handleArtikelAdded}
+            onCancel={() => setShowForm(false)}
+          />
+        </div>
+      )}
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-8">
+          <h3 className="text-lg font-semibold text-red-800 mb-2">
+            Fout opgetreden
+          </h3>
+          <pre className="text-sm text-red-700 whitespace-pre-wrap">
+            {error}
+          </pre>
+          <div className="mt-4">
+            <Button
+              onClick={loadArtikelen}
+              variant="destructive"
+              className="mr-4"
+            >
+              Opnieuw proberen
+            </Button>
+            <a
+              href="/test-supabase"
+              className="text-red-600 hover:text-red-800 font-medium"
+            >
+              Test Supabase verbinding
+            </a>
           </div>
         </div>
-      </div>
+      )}
 
-      <div className="max-w-7xl mx-auto p-6">
-        {showForm && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h2 className="text-xl font-semibold mb-4 text-[#051e50]">Nieuw Artikel Toevoegen</h2>
-            <ArtikelForm onSuccess={handleArtikelAdded} onCancel={() => setShowForm(false)} />
-          </div>
-        )}
+      {!error && !loading && (
+        <>
+          {/* Controls */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <Input
+                  type="text"
+                  placeholder="Zoeken op naam, ID, referenties..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 w-64"
+                />
+                <svg
+                  className="absolute left-3 top-2.5 h-5 w-5 text-[#051e50]"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </div>
+              <span className="text-sm text-[#051e50]">
+                {filteredArtikelen.length} van {artikelen.length} artikelen
+              </span>
+            </div>
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-8">
-            <h3 className="text-lg font-semibold text-red-800 mb-2">Fout opgetreden</h3>
-            <pre className="text-sm text-red-700 whitespace-pre-wrap">{error}</pre>
-            <div className="mt-4">
-              <Button onClick={loadArtikelen} variant="destructive" className="mr-4">
-                Opnieuw proberen
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-[#051e50]">Weergave:</span>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setViewMode("list")}
+                className={
+                  viewMode === "list"
+                    ? "bg-blue-100 text-blue-600"
+                    : "text-[#051e50] hover:text-[#051e50]"
+                }
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 10h16M4 14h16M4 18h16"
+                  />
+                </svg>
               </Button>
-              <a href="/test-supabase" className="text-red-600 hover:text-red-800 font-medium">
-                Test Supabase verbinding
-              </a>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setViewMode("cards")}
+                className={
+                  viewMode === "cards"
+                    ? "bg-blue-100 text-blue-600"
+                    : "text-[#051e50] hover:text-[#051e50]"
+                }
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                  />
+                </svg>
+              </Button>
             </div>
           </div>
-        )}
 
-        {!error && !loading && (
-          <>
-            {/* Controls */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-              <div className="flex items-center space-x-4">
-                <div className="relative">
-                  <Input type="text" placeholder="Zoeken op naam, ID, referenties..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10 w-64" />
-                  <svg className="absolute left-3 top-2.5 h-5 w-5 text-[#051e50]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-                <span className="text-sm text-[#051e50]">
-                  {filteredArtikelen.length} van {artikelen.length} artikelen
-                </span>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-[#051e50]">Weergave:</span>
-                <Button variant="ghost" size="icon" onClick={() => setViewMode("list")} className={viewMode === "list" ? "bg-blue-100 text-blue-600" : "text-[#051e50] hover:text-[#051e50]"}>
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                  </svg>
-                </Button>
-                <Button variant="ghost" size="icon" onClick={() => setViewMode("cards")} className={viewMode === "cards" ? "bg-blue-100 text-blue-600" : "text-[#051e50] hover:text-[#051e50]"}>
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
-                    />
-                  </svg>
-                </Button>
-              </div>
+          {/* Content */}
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <span className="ml-3 text-[#051e50]">Artikelen laden...</span>
             </div>
-
-            {/* Content */}
-            {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                <span className="ml-3 text-[#051e50]">Artikelen laden...</span>
-              </div>
-            ) : filteredArtikelen.length === 0 ? (
-              <div className="text-center py-12">
-                {searchTerm ? (
-                  <p className="text-[#051e50] text-lg">Geen artikelen gevonden voor "{searchTerm}"</p>
-                ) : (
-                  <div>
-                    <p className="text-[#051e50] text-lg mb-4">Nog geen artikelen toegevoegd</p>
-                    <Button variant="link" onClick={() => setShowForm(true)} className="text-blue-600 hover:text-blue-800 p-0 h-auto">
-                      Voeg je eerste artikel toe
-                    </Button>
-                  </div>
-                )}
-              </div>
-            ) : viewMode === "list" ? (
-              <ArtikelList artikelen={filteredArtikelen} onUpdate={loadArtikelen} />
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                {filteredArtikelen.map((artikel) => (
-                  <ArtikelCard key={artikel.id} artikel={artikel} onUpdate={loadArtikelen} />
-                ))}
-              </div>
-            )}
-          </>
-        )}
-      </div>
+          ) : filteredArtikelen.length === 0 ? (
+            <div className="text-center py-12">
+              {searchTerm ? (
+                <p className="text-[#051e50] text-lg">
+                  Geen artikelen gevonden voor "{searchTerm}"
+                </p>
+              ) : (
+                <div>
+                  <p className="text-[#051e50] text-lg mb-4">
+                    Nog geen artikelen toegevoegd
+                  </p>
+                  <Button
+                    variant="link"
+                    onClick={() => setShowForm(true)}
+                    className="text-blue-600 hover:text-blue-800 p-0 h-auto"
+                  >
+                    Voeg je eerste artikel toe
+                  </Button>
+                </div>
+              )}
+            </div>
+          ) : viewMode === "list" ? (
+            <ArtikelList
+              artikelen={filteredArtikelen}
+              onUpdate={loadArtikelen}
+            />
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+              {filteredArtikelen.map((artikel) => (
+                <ArtikelCard
+                  key={artikel.id}
+                  artikel={artikel}
+                  onUpdate={loadArtikelen}
+                />
+              ))}
+            </div>
+          )}
+        </>
+      )}
     </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <ProtectedLayout
+      title="Safety Documentation"
+      subtitle="Veiligheidsbladen en artikel informatie"
+      showAdminLink={true}
+    >
+      <HomeContent />
+    </ProtectedLayout>
   );
 }
