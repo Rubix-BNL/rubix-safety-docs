@@ -9,7 +9,9 @@ import BulkImport from "@/components/bulk-import";
 import { Button } from "@/components/ui/button";
 
 export default function BulkPage() {
-  const [activeTab, setActiveTab] = useState<"import" | "export">("export");
+  const [activeTab, setActiveTab] = useState<"import" | "export" | "documents">(
+    "export",
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -19,13 +21,23 @@ export default function BulkPage() {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-2xl font-bold text-[#051e50] flex items-center">
-                <img src="/RUBIX_logo_blue.svg" alt="Rubix" className="h-[30px] w-[106px] mr-3" />
+                <img
+                  src="/RUBIX_logo_blue.svg"
+                  alt="Rubix"
+                  className="h-[30px] w-[106px] mr-3"
+                />
                 Bulk Import/Export
               </h1>
-              <p className="text-[#051e50] mt-1">Bulk operaties voor artikelen en veiligheidsbladen</p>
+              <p className="text-[#051e50] mt-1">
+                Bulk operaties voor artikelen en veiligheidsbladen
+              </p>
             </div>
             <div className="flex items-center space-x-4">
-              <Button asChild variant="outline" className="border-[#051e50] text-[#051e50] hover:bg-[#051e50] hover:text-white">
+              <Button
+                asChild
+                variant="outline"
+                className="border-[#051e50] text-[#051e50] hover:bg-[#051e50] hover:text-white"
+              >
                 <Link href="/">Terug naar Home</Link>
               </Button>
             </div>
@@ -50,22 +62,35 @@ export default function BulkPage() {
               >
                 Import Data
               </button>
+              <button
+                onClick={() => setActiveTab("documents")}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === "documents" ? "border-[#051e50] text-[#051e50]" : "border-transparent text-gray-500 hover:text-[#051e50]"}`}
+              >
+                Upload Documenten
+              </button>
             </nav>
           </div>
 
-          <div className="p-6">{activeTab === "export" ? <BulkExport /> : <BulkImport />}</div>
+          <div className="p-6">
+            {activeTab === "export" ? <BulkExport /> : <BulkImport />}
+          </div>
         </div>
 
         {/* Info section */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-          <h3 className="text-lg font-semibold mb-3 text-blue-900">Instructies</h3>
+          <h3 className="text-lg font-semibold mb-3 text-blue-900">
+            Instructies
+          </h3>
           <div className="space-y-4">
             <div>
               <h4 className="font-medium text-blue-800">Export:</h4>
               <ul className="text-blue-700 text-sm space-y-1 ml-4">
                 <li>• Download alle artikelen als CSV bestand</li>
                 <li>• Inclusief alle metadata en referenties</li>
-                <li>• Kan geopend worden in Excel of andere spreadsheet programma's</li>
+                <li>
+                  • Kan geopend worden in Excel of andere spreadsheet
+                  programma's
+                </li>
               </ul>
             </div>
             <div>
@@ -73,7 +98,10 @@ export default function BulkPage() {
               <ul className="text-blue-700 text-sm space-y-1 ml-4">
                 <li>• Upload een CSV bestand met artikelen</li>
                 <li>• Vereiste kolommen: naam, unieke_id</li>
-                <li>• Optionele kolommen: referentie_rubix, referentie_fabrikant, ean</li>
+                <li>
+                  • Optionele kolommen: referentie_rubix, referentie_fabrikant,
+                  ean
+                </li>
                 <li>• Duplicaten worden automatisch gedetecteerd</li>
               </ul>
             </div>
