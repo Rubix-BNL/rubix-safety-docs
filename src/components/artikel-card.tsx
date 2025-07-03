@@ -143,7 +143,7 @@ export default function ArtikelCard({ artikel, onUpdate }: ArtikelCardProps) {
                       </div>
                       <div className="flex space-x-2">
                         <a
-                          href={`${supabase.storage.from("veiligheidsbladen").getPublicUrl(latestVeiligheidsblad.storage_path).data.publicUrl}`}
+                          href={`${supabase.storage.from("safety-docs").getPublicUrl(latestVeiligheidsblad.storage_path).data.publicUrl}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-xs text-blue-600 hover:text-blue-800 font-medium"

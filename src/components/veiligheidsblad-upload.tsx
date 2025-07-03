@@ -80,7 +80,7 @@ export default function VeiligheidsbladUpload({
 
       // Upload versioned file
       const { error: versionError } = await supabase.storage
-        .from("veiligheidsbladen")
+        .from("safety-docs")
         .upload(versionPath, selectedFile, {
           cacheControl: "3600",
           upsert: false,
@@ -100,7 +100,7 @@ export default function VeiligheidsbladUpload({
 
       // Upload to latest folder (overwrite existing)
       const { error: latestError } = await supabase.storage
-        .from("veiligheidsbladen")
+        .from("safety-docs")
         .upload(latestPath, selectedFile, {
           cacheControl: "3600",
           upsert: true,
@@ -117,7 +117,7 @@ export default function VeiligheidsbladUpload({
 
       // Get public URLs
       const { data: versionUrl } = supabase.storage
-        .from("veiligheidsbladen")
+        .from("safety-docs")
         .getPublicUrl(versionPath);
 
       // Save to database
