@@ -222,7 +222,7 @@ export default function HomePage() {
             ) : filteredArtikelen.length === 0 ? (
               <div className="text-center py-12">
                 {searchTerm ? (
-                  <p className="text-gray-500 text-lg">
+                  <p className="text-[#051e50] text-lg">
                     Geen artikelen gevonden voor "{searchTerm}"
                   </p>
                 ) : (
