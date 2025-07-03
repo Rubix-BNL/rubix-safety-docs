@@ -141,7 +141,7 @@ export default function VeiligheidsbladUpload({
 
       onUploadSuccess();
       closeModal();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Upload error:", err);
       alert(
         `Er is een onverwachte fout opgetreden: ${err?.message || err?.toString() || "Onbekende fout"}`,
