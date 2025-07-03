@@ -88,7 +88,13 @@ export default function VeiligheidsbladUpload({
 
       if (versionError) {
         console.error("Error uploading versioned file:", versionError);
-        alert("Fout bij uploaden: " + versionError.message);
+        console.error(
+          "Full error object:",
+          JSON.stringify(versionError, null, 2),
+        );
+        alert(
+          `Fout bij uploaden: ${versionError.message || "Onbekende fout"}\n\nDetails: ${versionError.error || versionError.statusText || "Geen extra details"}\n\nMogelijke oorzaak: Supabase Storage bucket bestaat niet of geen toegang`,
+        );
         return;
       }
 
@@ -102,6 +108,10 @@ export default function VeiligheidsbladUpload({
 
       if (latestError) {
         console.error("Error uploading latest file:", latestError);
+        console.error(
+          "Latest file error details:",
+          JSON.stringify(latestError, null, 2),
+        );
         // Continue anyway, versioned upload succeeded
       }
 
@@ -124,15 +134,23 @@ export default function VeiligheidsbladUpload({
 
       if (dbError) {
         console.error("Error saving to database:", dbError);
-        alert("Fout bij opslaan in database: " + dbError.message);
+        console.error(
+          "Database error details:",
+          JSON.stringify(dbError, null, 2),
+        );
+        alert(
+          `Fout bij opslaan in database: ${dbError.message || "Onbekende fout"}\n\nCode: ${dbError.code || "N/A"}\nDetails: ${dbError.details || "N/A"}`,
+        );
         return;
       }
 
       onUploadSuccess();
       closeModal();
-    } catch (err) {
+    } catch (err: any) {
       console.error("Upload error:", err);
-      alert("Er is een onverwachte fout opgetreden");
+      alert(
+        `Er is een onverwachte fout opgetreden: ${err?.message || err?.toString() || "Onbekende fout"}`,
+      );
     } finally {
       setIsUploading(false);
     }
