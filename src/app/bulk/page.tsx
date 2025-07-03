@@ -80,7 +80,8 @@ export default function BulkPage() {
         </div>
 
         {/* Info section */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+        {activeTab !== "documents" && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
           <h3 className="text-lg font-semibold mb-3 text-blue-900">
             Instructies
           </h3>
