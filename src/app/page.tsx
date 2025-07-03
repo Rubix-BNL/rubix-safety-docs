@@ -7,10 +7,11 @@ import { Artikel } from "@/lib/types";
 import ArtikelCard from "@/components/artikel-card";
 import ArtikelList from "@/components/artikel-list";
 import ArtikelForm from "@/components/artikel-form";
+import ProtectedLayout from "@/components/auth/protected-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-export default function HomePage() {
+function HomeContent() {
   const [artikelen, setArtikelen] = useState<Artikel[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -62,31 +63,7 @@ export default function HomePage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-[#ffd700] border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold text-[#051e50] flex items-center">
-                <img src="/RUBIX_logo_blue.svg" alt="Rubix" className="h-[30px] w-[106px] mr-3" />
-                Safety Documentation
-              </h1>
-              <p className="text-[#051e50] mt-1">Veiligheidsbladen en artikel informatie</p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Button asChild className="bg-[#051e50] hover:bg-[#051e50]/90 text-white font-medium">
-                <Link href="/bulk">Bulk Import/Export</Link>
-              </Button>
-              <Button onClick={() => setShowForm(!showForm)} className="bg-[#051e50] hover:bg-[#051e50]/90 text-white font-medium">
-                {showForm ? "Annuleren" : "Nieuw Artikel"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto p-6">
+    <div className="max-w-7xl mx-auto p-6">
         {showForm && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-8">
             <h2 className="text-xl font-semibold mb-4 text-[#051e50]">Nieuw Artikel Toevoegen</h2>
@@ -177,5 +154,17 @@ export default function HomePage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <ProtectedLayout
+      title="Safety Documentation"
+      subtitle="Veiligheidsbladen en artikel informatie"
+      showAdminLink={true}
+    >
+      <HomeContent />
+    </ProtectedLayout>
   );
 }
