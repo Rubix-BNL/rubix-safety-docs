@@ -11,12 +11,11 @@ interface ArtikelFormProps {
 
 export default function ArtikelForm({ onSuccess, onCancel }: ArtikelFormProps) {
   const [formData, setFormData] = useState({
+    unieke_id: "",
     naam: "",
-    omschrijving: "",
-    leverancier: "",
-    artikelnummer: "",
-    ean_code: "",
-    referentie_nummer: "",
+    referentie_rubix: "",
+    referentie_fabrikant: "",
+    ean: "",
   });
   const [saving, setSaving] = useState(false);
 
@@ -76,29 +75,44 @@ export default function ArtikelForm({ onSuccess, onCancel }: ArtikelFormProps) {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Leverancier
+            Unieke ID *
           </label>
           <input
             type="text"
-            name="leverancier"
-            value={formData.leverancier}
+            name="unieke_id"
+            value={formData.unieke_id}
             onChange={handleChange}
+            required
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Leverancier naam"
+            placeholder="Uniek artikel ID"
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Artikelnummer
+            Referentie Rubix
           </label>
           <input
             type="text"
-            name="artikelnummer"
-            value={formData.artikelnummer}
+            name="referentie_rubix"
+            value={formData.referentie_rubix}
             onChange={handleChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Intern artikelnummer"
+            placeholder="Rubix referentie"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Referentie Fabrikant
+          </label>
+          <input
+            type="text"
+            name="referentie_fabrikant"
+            value={formData.referentie_fabrikant}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Fabrikant referentie"
           />
         </div>
 
@@ -108,41 +122,13 @@ export default function ArtikelForm({ onSuccess, onCancel }: ArtikelFormProps) {
           </label>
           <input
             type="text"
-            name="ean_code"
-            value={formData.ean_code}
+            name="ean"
+            value={formData.ean}
             onChange={handleChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="EAN/Barcode"
           />
         </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Referentienummer
-          </label>
-          <input
-            type="text"
-            name="referentie_nummer"
-            value={formData.referentie_nummer}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Externe referentie"
-          />
-        </div>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Omschrijving
-        </label>
-        <textarea
-          name="omschrijving"
-          value={formData.omschrijving}
-          onChange={handleChange}
-          rows={3}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Beschrijving van het artikel"
-        />
       </div>
 
       <div className="flex justify-end space-x-3 pt-4">
@@ -155,7 +141,7 @@ export default function ArtikelForm({ onSuccess, onCancel }: ArtikelFormProps) {
         </button>
         <button
           type="submit"
-          disabled={saving || !formData.naam}
+          disabled={saving || !formData.naam || !formData.unieke_id}
           className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-md transition-colors"
         >
           {saving ? "Opslaan..." : "Artikel Toevoegen"}

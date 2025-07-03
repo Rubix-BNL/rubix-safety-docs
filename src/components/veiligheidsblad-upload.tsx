@@ -117,10 +117,9 @@ export default function VeiligheidsbladUpload({
           artikel_id: artikelId,
           taal: taal,
           versie: newVersion,
-          bestand_url: versionUrl.publicUrl,
-          bestand_naam: selectedFile.name,
-          upload_datum: new Date().toISOString(),
-          is_latest: true,
+          storage_path: versionPath,
+          bestandsnaam: selectedFile.name,
+          geupload_op: new Date().toISOString(),
         });
 
       if (dbError) {
@@ -128,14 +127,6 @@ export default function VeiligheidsbladUpload({
         alert("Fout bij opslaan in database: " + dbError.message);
         return;
       }
-
-      // Mark previous versions as not latest
-      await supabase
-        .from("veiligheidsbladen")
-        .update({ is_latest: false })
-        .eq("artikel_id", artikelId)
-        .eq("taal", taal)
-        .neq("versie", newVersion);
 
       onUploadSuccess();
       closeModal();

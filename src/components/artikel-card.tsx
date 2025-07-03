@@ -46,8 +46,7 @@ export default function ArtikelCard({ artikel, onUpdate }: ArtikelCardProps) {
       .filter((vb) => vb.taal === taal)
       .sort(
         (a, b) =>
-          new Date(b.upload_datum).getTime() -
-          new Date(a.upload_datum).getTime(),
+          new Date(b.geupload_op).getTime() - new Date(a.geupload_op).getTime(),
       )[0];
   }
 
@@ -70,36 +69,27 @@ export default function ArtikelCard({ artikel, onUpdate }: ArtikelCardProps) {
         </h3>
 
         <div className="space-y-1 text-sm text-gray-600">
-          {artikel.leverancier && (
+          <p>
+            <span className="font-medium">Unieke ID:</span> {artikel.unieke_id}
+          </p>
+          {artikel.referentie_rubix && (
             <p>
-              <span className="font-medium">Leverancier:</span>{" "}
-              {artikel.leverancier}
+              <span className="font-medium">Ref. Rubix:</span>{" "}
+              {artikel.referentie_rubix}
             </p>
           )}
-          {artikel.artikelnummer && (
+          {artikel.referentie_fabrikant && (
             <p>
-              <span className="font-medium">Artikelnummer:</span>{" "}
-              {artikel.artikelnummer}
+              <span className="font-medium">Ref. Fabrikant:</span>{" "}
+              {artikel.referentie_fabrikant}
             </p>
           )}
-          {artikel.ean_code && (
+          {artikel.ean && (
             <p>
-              <span className="font-medium">EAN:</span> {artikel.ean_code}
-            </p>
-          )}
-          {artikel.referentie_nummer && (
-            <p>
-              <span className="font-medium">Referentie:</span>{" "}
-              {artikel.referentie_nummer}
+              <span className="font-medium">EAN:</span> {artikel.ean}
             </p>
           )}
         </div>
-
-        {artikel.omschrijving && (
-          <p className="mt-3 text-sm text-gray-700 bg-gray-50 p-2 rounded">
-            {artikel.omschrijving}
-          </p>
-        )}
       </div>
 
       {/* Veiligheidsbladen Section */}
@@ -138,7 +128,7 @@ export default function ArtikelCard({ artikel, onUpdate }: ArtikelCardProps) {
                     {latestVeiligheidsblad && (
                       <div className="text-xs text-gray-500">
                         v{latestVeiligheidsblad.versie} •{" "}
-                        {formatDate(latestVeiligheidsblad.upload_datum)}
+                        {formatDate(latestVeiligheidsblad.geupload_op)}
                       </div>
                     )}
                   </div>
@@ -148,12 +138,12 @@ export default function ArtikelCard({ artikel, onUpdate }: ArtikelCardProps) {
                       <div className="flex items-center">
                         <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
                         <span className="text-sm text-gray-700">
-                          {latestVeiligheidsblad.bestand_naam}
+                          {latestVeiligheidsblad.bestandsnaam}
                         </span>
                       </div>
                       <div className="flex space-x-2">
                         <a
-                          href={latestVeiligheidsblad.bestand_url}
+                          href={`${supabase.storage.from("veiligheidsbladen").getPublicUrl(latestVeiligheidsblad.storage_path).data.publicUrl}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-xs text-blue-600 hover:text-blue-800 font-medium"
