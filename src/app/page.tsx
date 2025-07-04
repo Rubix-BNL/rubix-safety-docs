@@ -27,10 +27,7 @@ function HomeContent() {
     try {
       console.log("Loading artikelen...");
 
-      const { data, error } = await supabase
-        .from("artikelen")
-        .select("*")
-        .order("id", { ascending: false });
+      const { data, error } = await supabase.from("artikelen").select("*").order("id", { ascending: false });
 
       if (error) {
         console.error("Full error object:", JSON.stringify(error, null, 2));
@@ -43,7 +40,14 @@ function HomeContent() {
       setArtikelen(data || []);
     } catch (err: unknown) {
       console.error("Catch block error:", err);
-      const errorMsg = `Onverwachte fout: ${err?.message || err?.toString() || "Onbekende fout"}`;
+      let errorMsg = "Onverwachte fout: Onbekende fout";
+      if (err instanceof Error) {
+        errorMsg = `Onverwachte fout: ${err.message}`;
+      } else if (typeof err === "object" && err !== null && "message" in err) {
+        errorMsg = `Onverwachte fout: ${(err as any).message}`;
+      } else {
+        errorMsg = `Onverwachte fout: ${String(err)}`;
+      }
       setError(errorMsg);
     } finally {
       setLoading(false);
@@ -59,59 +63,36 @@ function HomeContent() {
     (artikel) =>
       artikel.naam.toLowerCase().includes(searchTerm.toLowerCase()) ||
       artikel.unieke_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      artikel.referentie_rubix
-        ?.toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      artikel.referentie_fabrikant
-        ?.toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      artikel.ean?.toLowerCase().includes(searchTerm.toLowerCase()),
+      artikel.referentie_rubix?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      artikel.referentie_fabrikant?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      artikel.ean?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div className="max-w-7xl mx-auto p-6">
       {/* Action Buttons */}
       <div className="flex justify-end items-center mb-6">
-        <Button
-          onClick={() => setShowForm(!showForm)}
-          className="bg-[#051e50] hover:bg-[#051e50]/90 text-white font-medium"
-        >
+        <Button onClick={() => setShowForm(!showForm)} className="bg-[#051e50] hover:bg-[#051e50]/90 text-white font-medium">
           {showForm ? "Annuleren" : "Nieuw Artikel"}
         </Button>
       </div>
 
       {showForm && (
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-[#051e50]">
-            Nieuw Artikel Toevoegen
-          </h2>
-          <ArtikelForm
-            onSuccess={handleArtikelAdded}
-            onCancel={() => setShowForm(false)}
-          />
+          <h2 className="text-xl font-semibold mb-4 text-[#051e50]">Nieuw Artikel Toevoegen</h2>
+          <ArtikelForm onSuccess={handleArtikelAdded} onCancel={() => setShowForm(false)} />
         </div>
       )}
 
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-8">
-          <h3 className="text-lg font-semibold text-red-800 mb-2">
-            Fout opgetreden
-          </h3>
-          <pre className="text-sm text-red-700 whitespace-pre-wrap">
-            {error}
-          </pre>
+          <h3 className="text-lg font-semibold text-red-800 mb-2">Fout opgetreden</h3>
+          <pre className="text-sm text-red-700 whitespace-pre-wrap">{error}</pre>
           <div className="mt-4">
-            <Button
-              onClick={loadArtikelen}
-              variant="destructive"
-              className="mr-4"
-            >
+            <Button onClick={loadArtikelen} variant="destructive" className="mr-4">
               Opnieuw proberen
             </Button>
-            <a
-              href="/test-supabase"
-              className="text-red-600 hover:text-red-800 font-medium"
-            >
+            <a href="/test-supabase" className="text-red-600 hover:text-red-800 font-medium">
               Test Supabase verbinding
             </a>
           </div>
@@ -124,25 +105,9 @@ function HomeContent() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <div className="flex items-center space-x-4">
               <div className="relative">
-                <Input
-                  type="text"
-                  placeholder="Zoeken op naam, ID, referenties..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 w-64"
-                />
-                <svg
-                  className="absolute left-3 top-2.5 h-5 w-5 text-[#051e50]"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
+                <Input type="text" placeholder="Zoeken op naam, ID, referenties..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10 w-64" />
+                <svg className="absolute left-3 top-2.5 h-5 w-5 text-[#051e50]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
               <span className="text-sm text-[#051e50]">
@@ -152,46 +117,13 @@ function HomeContent() {
 
             <div className="flex items-center space-x-2">
               <span className="text-sm text-[#051e50]">Weergave:</span>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setViewMode("list")}
-                className={
-                  viewMode === "list"
-                    ? "bg-blue-100 text-blue-600"
-                    : "text-[#051e50] hover:text-[#051e50]"
-                }
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 10h16M4 14h16M4 18h16"
-                  />
+              <Button variant="ghost" size="icon" onClick={() => setViewMode("list")} className={viewMode === "list" ? "bg-blue-100 text-blue-600" : "text-[#051e50] hover:text-[#051e50]"}>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                 </svg>
               </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setViewMode("cards")}
-                className={
-                  viewMode === "cards"
-                    ? "bg-blue-100 text-blue-600"
-                    : "text-[#051e50] hover:text-[#051e50]"
-                }
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+              <Button variant="ghost" size="icon" onClick={() => setViewMode("cards")} className={viewMode === "cards" ? "bg-blue-100 text-blue-600" : "text-[#051e50] hover:text-[#051e50]"}>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -212,37 +144,22 @@ function HomeContent() {
           ) : filteredArtikelen.length === 0 ? (
             <div className="text-center py-12">
               {searchTerm ? (
-                <p className="text-[#051e50] text-lg">
-                  Geen artikelen gevonden voor &quot;{searchTerm}&quot;
-                </p>
+                <p className="text-[#051e50] text-lg">Geen artikelen gevonden voor &quot;{searchTerm}&quot;</p>
               ) : (
                 <div>
-                  <p className="text-[#051e50] text-lg mb-4">
-                    Nog geen artikelen toegevoegd
-                  </p>
-                  <Button
-                    variant="link"
-                    onClick={() => setShowForm(true)}
-                    className="text-blue-600 hover:text-blue-800 p-0 h-auto"
-                  >
+                  <p className="text-[#051e50] text-lg mb-4">Nog geen artikelen toegevoegd</p>
+                  <Button variant="link" onClick={() => setShowForm(true)} className="text-blue-600 hover:text-blue-800 p-0 h-auto">
                     Voeg je eerste artikel toe
                   </Button>
                 </div>
               )}
             </div>
           ) : viewMode === "list" ? (
-            <ArtikelList
-              artikelen={filteredArtikelen}
-              onUpdate={loadArtikelen}
-            />
+            <ArtikelList artikelen={filteredArtikelen} onUpdate={loadArtikelen} />
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredArtikelen.map((artikel) => (
-                <ArtikelCard
-                  key={artikel.id}
-                  artikel={artikel}
-                  onUpdate={loadArtikelen}
-                />
+                <ArtikelCard key={artikel.id} artikel={artikel} onUpdate={loadArtikelen} />
               ))}
             </div>
           )}
@@ -254,10 +171,7 @@ function HomeContent() {
 
 export default function HomePage() {
   return (
-    <ProtectedLayout
-      title="Safety Documentation"
-      subtitle="Veiligheidsbladen en artikel informatie"
-    >
+    <ProtectedLayout title="Safety Documentation" subtitle="Veiligheidsbladen en artikel informatie">
       <HomeContent />
     </ProtectedLayout>
   );
