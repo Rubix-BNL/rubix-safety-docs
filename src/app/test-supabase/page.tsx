@@ -102,7 +102,7 @@ export default function TestSupabasePage() {
             tableResults.push({
               name: tableName,
               accessible: false,
-              error: err.message || "Onbekende fout",
+              error: (err as Error)?.message || "Onbekende fout",
             });
           }
         }
@@ -111,7 +111,7 @@ export default function TestSupabasePage() {
       } catch (err: unknown) {
         setStatus({
           connected: false,
-          error: err.message || "Onbekende fout",
+          error: (err as Error)?.message || "Onbekende fout",
           details: err,
         });
       } finally {
