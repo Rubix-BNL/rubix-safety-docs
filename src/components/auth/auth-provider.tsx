@@ -114,7 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [handleAuthError]);
 
   const signIn = async (email: string, password: string) => {
     try {
