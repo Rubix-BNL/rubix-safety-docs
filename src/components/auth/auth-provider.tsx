@@ -31,15 +31,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const handleAuthError = (error: any) => {
     console.error("Auth error:", error);
 
-    // Check for refresh token errors
-    if (
-      error?.message?.includes("refresh") ||
-      error?.message?.includes("Refresh Token Not Found") ||
-      error?.message?.includes("Invalid Refresh Token") ||
-      error?.status === 400
-    ) {
+    // Check for auth-related errors using utility function
+    if (isAuthError(error)) {
       // Clear invalid session data
       clearAuthState();
+
+      // Clear auth storage
+      clearAuthStorage();
 
       // Force sign out to clear any stored tokens
       supabase.auth.signOut().catch(console.error);
