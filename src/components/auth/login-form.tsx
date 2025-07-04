@@ -36,12 +36,13 @@ export default function LoginForm() {
       console.error("Auth error:", err);
 
       // Handle specific auth errors
-      if (err.message?.includes("refresh") || err.message?.includes("token")) {
+      const errorMessage = (err as Error)?.message || "";
+      if (errorMessage.includes("refresh") || errorMessage.includes("token")) {
         setError("Sessie verlopen. Probeer opnieuw in te loggen.");
       } else if (mode === "login") {
         setError("Onjuiste email of wachtwoord");
       } else {
-        setError(err.message || "Fout bij aanmaken account");
+        setError(errorMessage || "Fout bij aanmaken account");
       }
     } finally {
       setLoading(false);
