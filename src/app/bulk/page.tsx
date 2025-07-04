@@ -91,7 +91,7 @@ export default function BulkPage() {
                   <li>• Inclusief alle metadata en referenties</li>
                   <li>
                     • Kan geopend worden in Excel of andere spreadsheet
-                    programma's
+                    programma&apos;s
                   </li>
                 </ul>
               </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { Artikel, Veiligheidsblad, TALEN } from "@/lib/types";
 import VeiligheidsbladUpload from "@/components/veiligheidsblad-upload";
@@ -13,7 +13,7 @@ interface ArtikelCardProps {
   onUpdate?: () => void;
 }
 
-export default function ArtikelCard({ artikel, onUpdate }: ArtikelCardProps) {
+export default function ArtikelCard({ artikel }: ArtikelCardProps) {
   const [veiligheidsbladen, setVeiligheidsbladen] = useState<Veiligheidsblad[]>(
     [],
   );
@@ -23,7 +23,7 @@ export default function ArtikelCard({ artikel, onUpdate }: ArtikelCardProps) {
     loadVeiligheidsbladen();
   }, [artikel.id, loadVeiligheidsbladen]);
 
-  async function loadVeiligheidsbladen() {
+  const loadVeiligheidsbladen = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from("veiligheidsbladen")
@@ -42,7 +42,7 @@ export default function ArtikelCard({ artikel, onUpdate }: ArtikelCardProps) {
     } finally {
       setLoading(false);
     }
-  }
+  }, [artikel.id]);
 
   function getLatestVeiligheidsbladForTaal(taal: string) {
     return veiligheidsbladen
