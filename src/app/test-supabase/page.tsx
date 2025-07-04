@@ -63,7 +63,7 @@ export default function TestSupabasePage() {
 
         for (const tableName of tablesToTest) {
           try {
-            const { data, error } = await supabase
+            const { error } = await supabase
               .from(tableName)
               .select("*")
               .limit(1);
