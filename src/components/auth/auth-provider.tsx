@@ -28,7 +28,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(false);
   };
 
-  const handleAuthError = (error: any) => {
+  const handleAuthError = (error: unknown) => {
     console.error("Auth error:", error);
 
     // Check for auth-related errors using utility function

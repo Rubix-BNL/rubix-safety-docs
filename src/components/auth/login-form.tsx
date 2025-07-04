@@ -32,7 +32,7 @@ export default function LoginForm() {
         setMode("login");
         setError("Account aangemaakt! Je kunt nu inloggen.");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Auth error:", err);
 
       // Handle specific auth errors
