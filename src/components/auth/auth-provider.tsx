@@ -6,6 +6,7 @@ import {
   useEffect,
   useState,
   ReactNode,
+  useCallback,
 } from "react";
 import { supabase } from "@/lib/supabase";
 import { User, AuthState } from "@/lib/types";
@@ -28,7 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(false);
   };
 
-  const handleAuthError = (error: unknown) => {
+  const handleAuthError = useCallback((error: unknown) => {
     console.error("Auth error:", error);
 
     // Check for auth-related errors using utility function
@@ -42,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Force sign out to clear any stored tokens
       supabase.auth.signOut().catch(console.error);
     }
-  };
+  }, []);
 
   useEffect(() => {
     let mounted = true;
