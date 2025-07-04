@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase";
 interface ConnectionStatus {
   connected: boolean;
   error?: string;
-  details?: any;
+  details?: unknown;
 }
 
 interface TableTestResult {
@@ -27,21 +27,20 @@ export default function TestSupabasePage() {
   const [status, setStatus] = useState<ConnectionStatus | null>(null);
   const [tableTests, setTableTests] = useState<TableTestResult[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tableData, setTableData] = useState<{ [key: string]: any[] }>({});
+  const [tableData, setTableData] = useState<{ [key: string]: unknown[] }>({});
   const [inspectingTables, setInspectingTables] = useState(false);
   const [tableSchemas, setTableSchemas] = useState<{
     [key: string]: ColumnInfo[];
   }>({});
   const [loadingSchemas, setLoadingSchemas] = useState(false);
-  const [buckets, setBuckets] = useState<any[]>([]);
+  const [buckets, setBuckets] = useState<unknown[]>([]);
   const [loadingBuckets, setLoadingBuckets] = useState(false);
 
   useEffect(() => {
     async function testConnection() {
       try {
         // Test de verbinding door de auth sessie op te halen
-        const { data: authData, error: authError } =
-          await supabase.auth.getSession();
+        const { error: authError } = await supabase.auth.getSession();
 
         if (authError) {
           setStatus({
