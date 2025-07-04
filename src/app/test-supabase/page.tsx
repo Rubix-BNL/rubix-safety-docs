@@ -98,7 +98,7 @@ export default function TestSupabasePage() {
                 accessible: true,
               });
             }
-          } catch (err: any) {
+          } catch (err: unknown) {
             tableResults.push({
               name: tableName,
               accessible: false,
@@ -108,7 +108,7 @@ export default function TestSupabasePage() {
         }
 
         setTableTests(tableResults);
-      } catch (err: any) {
+      } catch (err: unknown) {
         setStatus({
           connected: false,
           error: err.message || "Onbekende fout",
