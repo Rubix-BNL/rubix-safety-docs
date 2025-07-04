@@ -48,16 +48,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let mounted = true;
 
-    // Get initial session with error handling
+    // Get initial session with error handling and timeout
     const getInitialSession = async () => {
       try {
+        // Add timeout to prevent hanging
+        const timeout = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Auth timeout")), 10000),
+        );
+
+        const sessionPromise = supabase.auth.getSession();
+
         const {
           data: { session },
           error,
-        } = await supabase.auth.getSession();
+        } = await Promise.race([sessionPromise, timeout]);
 
         if (error) {
-          handleAuthError(error);
+          console.error("Session error:", error);
+          if (mounted) {
+            setLoading(false);
+          }
           return;
         }
 
@@ -75,8 +85,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setLoading(false);
         }
       } catch (error) {
+        console.error("Auth initialization error:", error);
         if (mounted) {
-          handleAuthError(error);
+          setLoading(false);
         }
       }
     };

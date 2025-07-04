@@ -8,13 +8,15 @@ export function cn(...inputs: ClassValue[]) {
 // Auth utility functions
 export function clearAuthStorage() {
   try {
-    // Clear all auth-related items from localStorage
-    const keys = Object.keys(localStorage);
-    keys.forEach((key) => {
-      if (key.startsWith("supabase.auth") || key.includes("auth")) {
-        localStorage.removeItem(key);
-      }
-    });
+    // Check if localStorage is available (not in SSR)
+    if (typeof window !== "undefined" && window.localStorage) {
+      const keys = Object.keys(localStorage);
+      keys.forEach((key) => {
+        if (key.startsWith("supabase.auth") || key.includes("auth")) {
+          localStorage.removeItem(key);
+        }
+      });
+    }
   } catch (error) {
     console.error("Error clearing auth storage:", error);
   }
