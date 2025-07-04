@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase";
 interface ConnectionStatus {
   connected: boolean;
   error?: string;
-  details?: any;
+  details?: unknown;
 }
 
 interface TableTestResult {
@@ -27,21 +27,20 @@ export default function TestSupabasePage() {
   const [status, setStatus] = useState<ConnectionStatus | null>(null);
   const [tableTests, setTableTests] = useState<TableTestResult[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tableData, setTableData] = useState<{ [key: string]: any[] }>({});
+  const [tableData, setTableData] = useState<{ [key: string]: unknown[] }>({});
   const [inspectingTables, setInspectingTables] = useState(false);
   const [tableSchemas, setTableSchemas] = useState<{
     [key: string]: ColumnInfo[];
   }>({});
   const [loadingSchemas, setLoadingSchemas] = useState(false);
-  const [buckets, setBuckets] = useState<any[]>([]);
+  const [buckets, setBuckets] = useState<unknown[]>([]);
   const [loadingBuckets, setLoadingBuckets] = useState(false);
 
   useEffect(() => {
     async function testConnection() {
       try {
         // Test de verbinding door de auth sessie op te halen
-        const { data: authData, error: authError } =
-          await supabase.auth.getSession();
+        const { error: authError } = await supabase.auth.getSession();
 
         if (authError) {
           setStatus({
@@ -64,7 +63,7 @@ export default function TestSupabasePage() {
 
         for (const tableName of tablesToTest) {
           try {
-            const { data, error } = await supabase
+            const { error } = await supabase
               .from(tableName)
               .select("*")
               .limit(1);
@@ -99,20 +98,20 @@ export default function TestSupabasePage() {
                 accessible: true,
               });
             }
-          } catch (err: any) {
+          } catch (err: unknown) {
             tableResults.push({
               name: tableName,
               accessible: false,
-              error: err.message || "Onbekende fout",
+              error: (err as Error)?.message || "Onbekende fout",
             });
           }
         }
 
         setTableTests(tableResults);
-      } catch (err: any) {
+      } catch (err: unknown) {
         setStatus({
           connected: false,
-          error: err.message || "Onbekende fout",
+          error: (err as Error)?.message || "Onbekende fout",
           details: err,
         });
       } finally {

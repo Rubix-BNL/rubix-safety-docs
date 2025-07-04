@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
-import { Artikel } from "@/lib/types";
 import BulkExport from "@/components/bulk-export";
 import BulkImport from "@/components/bulk-import";
 import BulkDocumentUpload from "@/components/bulk-document-upload";
@@ -93,7 +91,7 @@ export default function BulkPage() {
                   <li>• Inclusief alle metadata en referenties</li>
                   <li>
                     • Kan geopend worden in Excel of andere spreadsheet
-                    programma's
+                    programma&apos;s
                   </li>
                 </ul>
               </div>

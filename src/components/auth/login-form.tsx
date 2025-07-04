@@ -32,12 +32,17 @@ export default function LoginForm() {
         setMode("login");
         setError("Account aangemaakt! Je kunt nu inloggen.");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Auth error:", err);
-      if (mode === "login") {
+
+      // Handle specific auth errors
+      const errorMessage = (err as Error)?.message || "";
+      if (errorMessage.includes("refresh") || errorMessage.includes("token")) {
+        setError("Sessie verlopen. Probeer opnieuw in te loggen.");
+      } else if (mode === "login") {
         setError("Onjuiste email of wachtwoord");
       } else {
-        setError(err.message || "Fout bij aanmaken account");
+        setError(errorMessage || "Fout bij aanmaken account");
       }
     } finally {
       setLoading(false);

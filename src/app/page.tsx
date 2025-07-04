@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { Artikel } from "@/lib/types";
 import ArtikelCard from "@/components/artikel-card";
@@ -42,7 +41,7 @@ function HomeContent() {
 
       console.log("Successfully loaded artikelen:", data);
       setArtikelen(data || []);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Catch block error:", err);
       const errorMsg = `Onverwachte fout: ${err?.message || err?.toString() || "Onbekende fout"}`;
       setError(errorMsg);
@@ -214,7 +213,7 @@ function HomeContent() {
             <div className="text-center py-12">
               {searchTerm ? (
                 <p className="text-[#051e50] text-lg">
-                  Geen artikelen gevonden voor "{searchTerm}"
+                  Geen artikelen gevonden voor &quot;{searchTerm}&quot;
                 </p>
               ) : (
                 <div>
