@@ -9,6 +9,7 @@ import {
 } from "react";
 import { supabase } from "@/lib/supabase";
 import { User, AuthState } from "@/lib/types";
+import { isAuthError, clearAuthStorage } from "@/lib/utils";
 
 interface AuthContextType extends AuthState {
   signIn: (email: string, password: string) => Promise<void>;
