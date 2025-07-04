@@ -22,26 +22,82 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(
-        session?.user
-          ? {
-              id: session.user.id,
-              email: session.user.email!,
-              role: "admin", // Default role for now
-              created_at: session.user.created_at,
-            }
-          : null,
-      );
-      setLoading(false);
-    });
+  const clearAuthState = () => {
+    setUser(null);
+    setLoading(false);
+  };
 
-    // Listen for auth changes
+  const handleAuthError = (error: any) => {
+    console.error("Auth error:", error);
+
+    // Check for refresh token errors
+    if (
+      error?.message?.includes("refresh") ||
+      error?.message?.includes("Refresh Token Not Found") ||
+      error?.message?.includes("Invalid Refresh Token") ||
+      error?.status === 400
+    ) {
+      // Clear invalid session data
+      clearAuthState();
+
+      // Force sign out to clear any stored tokens
+      supabase.auth.signOut().catch(console.error);
+    }
+  };
+
+  useEffect(() => {
+    let mounted = true;
+
+    // Get initial session with error handling
+    const getInitialSession = async () => {
+      try {
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
+
+        if (error) {
+          handleAuthError(error);
+          return;
+        }
+
+        if (mounted) {
+          setUser(
+            session?.user
+              ? {
+                  id: session.user.id,
+                  email: session.user.email!,
+                  role: "admin", // Default role for now
+                  created_at: session.user.created_at,
+                }
+              : null,
+          );
+          setLoading(false);
+        }
+      } catch (error) {
+        if (mounted) {
+          handleAuthError(error);
+        }
+      }
+    };
+
+    getInitialSession();
+
+    // Listen for auth changes with error handling
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!mounted) return;
+
+      // Handle different auth events
+      if (event === "TOKEN_REFRESHED") {
+        console.log("Token refreshed successfully");
+      } else if (event === "SIGNED_OUT") {
+        console.log("User signed out");
+        clearAuthState();
+        return;
+      }
+
       setUser(
         session?.user
           ? {
@@ -55,28 +111,54 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (error) throw error;
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) throw error;
+    } catch (error) {
+      handleAuthError(error);
+      throw error;
+    }
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    try {
+      // Clear user state immediately
+      clearAuthState();
+
+      // Sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Error signing out:", error);
+        // Don't throw here - user state is already cleared
+      }
+    } catch (error) {
+      console.error("Error during sign out:", error);
+      // Ensure user state is cleared even if sign out fails
+      clearAuthState();
+    }
   };
 
   const createUser = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-    if (error) throw error;
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+      if (error) throw error;
+    } catch (error) {
+      handleAuthError(error);
+      throw error;
+    }
   };
 
   return (
