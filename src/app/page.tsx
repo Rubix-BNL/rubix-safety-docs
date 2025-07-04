@@ -25,26 +25,21 @@ function HomeContent() {
   async function loadArtikelen() {
     setError(null);
     try {
-      console.log("Loading artikelen...");
-
       const { data, error } = await supabase.from("artikelen").select("*").order("id", { ascending: false });
 
       if (error) {
-        console.error("Full error object:", JSON.stringify(error, null, 2));
         const errorMsg = `Fout bij laden artikelen: ${error.message || "Onbekende fout"}\n\nCode: ${error.code || "N/A"}\nDetails: ${error.details || "N/A"}\nHint: ${error.hint || "N/A"}`;
         setError(errorMsg);
         return;
       }
 
-      console.log("Successfully loaded artikelen:", data);
       setArtikelen(data || []);
     } catch (err: unknown) {
-      console.error("Catch block error:", err);
       let errorMsg = "Onverwachte fout: Onbekende fout";
       if (err instanceof Error) {
         errorMsg = `Onverwachte fout: ${err.message}`;
       } else if (typeof err === "object" && err !== null && "message" in err) {
-        errorMsg = `Onverwachte fout: ${(err as any).message}`;
+        errorMsg = `Onverwachte fout: ${(err as { message: string }).message}`;
       } else {
         errorMsg = `Onverwachte fout: ${String(err)}`;
       }

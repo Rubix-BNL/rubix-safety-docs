@@ -18,30 +18,22 @@ export function clearAuthStorage() {
       });
     }
   } catch (error) {
-    console.error("Error clearing auth storage:", error);
+    // Silent error handling for auth storage cleanup
   }
 }
 
-export function isAuthError(error: any): boolean {
+export function isAuthError(error: unknown): boolean {
   if (!error) return false;
 
-  const message = error.message?.toLowerCase() || "";
-  const status = error.status;
+  const errorObj = error as { message?: string; status?: number };
+  const message = errorObj.message?.toLowerCase() || "";
+  const status = errorObj.status;
 
-  return (
-    message.includes("refresh") ||
-    message.includes("token") ||
-    message.includes("unauthorized") ||
-    message.includes("invalid") ||
-    status === 400 ||
-    status === 401 ||
-    status === 403
-  );
+  return message.includes("refresh") || message.includes("token") || message.includes("unauthorized") || message.includes("invalid") || status === 400 || status === 401 || status === 403;
 }
 
-export function handleAuthError(error: any): void {
+export function handleAuthError(error: unknown): void {
   if (isAuthError(error)) {
-    console.error("Authentication error detected:", error);
     clearAuthStorage();
 
     // Reload the page to reset the app state

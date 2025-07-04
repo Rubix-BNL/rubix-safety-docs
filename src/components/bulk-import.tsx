@@ -2,11 +2,10 @@
 
 import { useState, useRef } from "react";
 import { supabase } from "@/lib/supabase";
-import { Artikel } from "@/lib/types";
 
 interface ImportResult {
   success: number;
-  errors: Array<{ row: number; error: string; data?: any }>;
+  errors: Array<{ row: number; error: string; data?: Record<string, unknown> }>;
   duplicates: Array<{ row: number; unieke_id: string }>;
 }
 
@@ -16,6 +15,7 @@ interface ImportRow {
   referentie_rubix?: string;
   referentie_fabrikant?: string;
   ean?: string;
+  [key: string]: unknown;
 }
 
 export default function BulkImport() {
@@ -28,22 +28,17 @@ export default function BulkImport() {
 
   function parseCSV(csvText: string): ImportRow[] {
     const lines = csvText.trim().split("\n");
-    if (lines.length < 2)
-      throw new Error("CSV moet minstens een header en één data rij hebben");
+    if (lines.length < 2) throw new Error("CSV moet minstens een header en één data rij hebben");
 
     const headers = lines[0].split(",").map((h) => h.trim().replace(/"/g, ""));
     console.log("CSV headers:", headers);
 
     // Check required columns
     const requiredColumns = ["naam", "unieke_id"];
-    const missingColumns = requiredColumns.filter(
-      (col) => !headers.some((h) => h.toLowerCase() === col.toLowerCase()),
-    );
+    const missingColumns = requiredColumns.filter((col) => !headers.some((h) => h.toLowerCase() === col.toLowerCase()));
 
     if (missingColumns.length > 0) {
-      throw new Error(
-        `Vereiste kolommen ontbreken: ${missingColumns.join(", ")}`,
-      );
+      throw new Error(`Vereiste kolommen ontbreken: ${missingColumns.join(", ")}`);
     }
 
     const data: ImportRow[] = [];
@@ -53,7 +48,10 @@ export default function BulkImport() {
       if (!line) continue; // Skip empty lines
 
       const values = line.split(",").map((v) => v.trim().replace(/"/g, ""));
-      const row: any = {};
+      const row: ImportRow = {
+        naam: "",
+        unieke_id: "",
+      };
 
       headers.forEach((header, index) => {
         const normalizedHeader = header.toLowerCase();
@@ -61,10 +59,8 @@ export default function BulkImport() {
 
         if (normalizedHeader === "naam") row.naam = value;
         else if (normalizedHeader === "unieke_id") row.unieke_id = value;
-        else if (normalizedHeader === "referentie_rubix")
-          row.referentie_rubix = value;
-        else if (normalizedHeader === "referentie_fabrikant")
-          row.referentie_fabrikant = value;
+        else if (normalizedHeader === "referentie_rubix") row.referentie_rubix = value;
+        else if (normalizedHeader === "referentie_fabrikant") row.referentie_fabrikant = value;
         else if (normalizedHeader === "ean") row.ean = value;
       });
 
@@ -81,17 +77,13 @@ export default function BulkImport() {
     if (!file) return;
 
     if (!file.name.toLowerCase().endsWith(".csv")) {
-      alert(
-        "❌ Bestand niet toegestaan\n\nAlleen CSV bestanden kunnen worden geïmporteerd.\nKies een bestand met de extensie .csv",
-      );
+      alert("❌ Bestand niet toegestaan\n\nAlleen CSV bestanden kunnen worden geïmporteerd.\nKies een bestand met de extensie .csv");
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
       // 5MB limit
-      alert(
-        "❌ Bestand te groot\n\nHet geselecteerde bestand is groter dan 5MB.\nKies een kleiner bestand om door te gaan.",
-      );
+      alert("❌ Bestand te groot\n\nHet geselecteerde bestand is groter dan 5MB.\nKies een kleiner bestand om door te gaan.");
       return;
     }
 
@@ -107,9 +99,10 @@ export default function BulkImport() {
         const parsedData = parseCSV(csvText);
         setPreviewData(parsedData.slice(0, 10)); // Show first 10 rows
         setShowPreview(true);
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : "Onbekende fout";
         alert(
-          `❌ Bestand kan niet worden gelezen\n\nEr is een probleem opgetreden bij het lezen van het CSV bestand.\n\nFoutmelding: ${error.message}\n\nControleer of het bestand correct is opgeslagen als CSV.`,
+          `❌ Bestand kan niet worden gelezen\n\nEr is een probleem opgetreden bij het lezen van het CSV bestand.\n\nFoutmelding: ${errorMessage}\n\nControleer of het bestand correct is opgeslagen als CSV.`
         );
         setSelectedFile(null);
       }
@@ -119,10 +112,7 @@ export default function BulkImport() {
 
   async function checkDuplicates(data: ImportRow[]): Promise<string[]> {
     const uniqueIds = data.map((row) => row.unieke_id);
-    const { data: existingArtikelen, error } = await supabase
-      .from("artikelen")
-      .select("unieke_id")
-      .in("unieke_id", uniqueIds);
+    const { data: existingArtikelen, error } = await supabase.from("artikelen").select("unieke_id").in("unieke_id", uniqueIds);
 
     if (error) throw error;
 
@@ -178,15 +168,13 @@ export default function BulkImport() {
               }
 
               // Insert into database
-              const { error: insertError } = await supabase
-                .from("artikelen")
-                .insert({
-                  unieke_id: row.unieke_id,
-                  naam: row.naam,
-                  referentie_rubix: row.referentie_rubix || null,
-                  referentie_fabrikant: row.referentie_fabrikant || null,
-                  ean: row.ean || null,
-                });
+              const { error: insertError } = await supabase.from("artikelen").insert({
+                unieke_id: row.unieke_id,
+                naam: row.naam,
+                referentie_rubix: row.referentie_rubix || null,
+                referentie_fabrikant: row.referentie_fabrikant || null,
+                ean: row.ean || null,
+              });
 
               if (insertError) {
                 result.errors.push({
@@ -197,20 +185,21 @@ export default function BulkImport() {
               } else {
                 result.success++;
               }
-            } catch (rowError: any) {
+            } catch (rowError: unknown) {
+              const errorMessage = rowError instanceof Error ? rowError.message : "Onbekende fout";
               result.errors.push({
                 row: i + 2,
-                error: rowError.message || "Onbekende fout",
+                error: errorMessage,
                 data: row,
               });
             }
           }
 
           setImportResult(result);
-          console.log("Import completed:", result);
-        } catch (parseError: any) {
+        } catch (parseError: unknown) {
+          const errorMessage = parseError instanceof Error ? parseError.message : "Onbekende fout";
           alert(
-            `❌ Bestand verwerking mislukt\n\nHet CSV bestand kon niet worden verwerkt.\n\nMogelijke oorzaken:\n• Verkeerde bestandsindeling\n• Ontbrekende verplichte kolommen\n• Ongeldige gegevens\n\nFoutmelding: ${parseError.message}`,
+            `❌ Bestand verwerking mislukt\n\nHet CSV bestand kon niet worden verwerkt.\n\nMogelijke oorzaken:\n• Verkeerde bestandsindeling\n• Ontbrekende verplichte kolommen\n• Ongeldige gegevens\n\nFoutmelding: ${errorMessage}`
           );
         } finally {
           setIsImporting(false);
@@ -218,11 +207,9 @@ export default function BulkImport() {
       };
 
       reader.readAsText(selectedFile);
-    } catch (error: any) {
-      console.error("Import failed:", error);
-      alert(
-        `❌ Import mislukt\n\nDe artikelen konden niet worden geïmporteerd in de database.\n\nFoutmelding: ${error.message}\n\nProbeer het opnieuw of neem contact op met de beheerder.`,
-      );
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Onbekende fout";
+      alert(`❌ Import mislukt\n\nDe artikelen konden niet worden geïmporteerd in de database.\n\nFoutmelding: ${errorMessage}\n\nProbeer het opnieuw of neem contact op met de beheerder.`);
       setIsImporting(false);
     }
   }
@@ -259,13 +246,8 @@ export default function BulkImport() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold text-[#051e50] mb-4">
-          Data Importeren
-        </h2>
-        <p className="text-gray-600 mb-6">
-          Upload een CSV bestand om meerdere artikelen tegelijk toe te voegen
-          aan je database.
-        </p>
+        <h2 className="text-xl font-semibold text-[#051e50] mb-4">Data Importeren</h2>
+        <p className="text-gray-600 mb-6">Upload een CSV bestand om meerdere artikelen tegelijk toe te voegen aan je database.</p>
       </div>
 
       {/* Template download */}
@@ -273,26 +255,14 @@ export default function BulkImport() {
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-sm font-medium text-blue-800">CSV Template</h3>
-            <p className="text-sm text-blue-700">
-              Download een voorbeeld CSV bestand om de juiste structuur te zien
-            </p>
+            <p className="text-sm text-blue-700">Download een voorbeeld CSV bestand om de juiste structuur te zien</p>
           </div>
           <button
             onClick={downloadTemplate}
             className="inline-flex items-center px-3 py-2 border border-blue-300 shadow-sm text-sm leading-4 font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100"
           >
-            <svg
-              className="w-4 h-4 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z"
-              />
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
             </svg>
             Download Template
           </button>
@@ -301,9 +271,7 @@ export default function BulkImport() {
 
       {/* File upload */}
       <div>
-        <label className="block text-sm font-medium text-[#051e50] mb-2">
-          CSV Bestand Selecteren
-        </label>
+        <label className="block text-sm font-medium text-[#051e50] mb-2">CSV Bestand Selecteren</label>
         <input
           ref={fileInputRef}
           type="file"
@@ -311,52 +279,33 @@ export default function BulkImport() {
           onChange={handleFileSelect}
           className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#051e50] file:text-white hover:file:bg-opacity-90"
         />
-        <p className="text-xs text-gray-500 mt-1">
-          Alleen CSV bestanden, maximaal 5MB
-        </p>
+        <p className="text-xs text-gray-500 mt-1">Alleen CSV bestanden, maximaal 5MB</p>
       </div>
 
       {/* Preview */}
       {showPreview && previewData.length > 0 && (
         <div>
           <h3 className="text-lg font-medium text-[#051e50] mb-3">
-            Voorbeeld Data ({previewData.length} van {previewData.length} rijen
-            getoond)
+            Voorbeeld Data ({previewData.length} van {previewData.length} rijen getoond)
           </h3>
           <div className="overflow-x-auto">
             <table className="min-w-full bg-white border border-gray-200 rounded">
               <thead className="bg-[#051e50]">
                 <tr>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-white uppercase">
-                    Naam
-                  </th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-white uppercase">
-                    Unieke ID
-                  </th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-white uppercase">
-                    Ref. Rubix
-                  </th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-white uppercase">
-                    Ref. Fabrikant
-                  </th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-white uppercase">
-                    EAN
-                  </th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-white uppercase">Naam</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-white uppercase">Unieke ID</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-white uppercase">Ref. Rubix</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-white uppercase">Ref. Fabrikant</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-white uppercase">EAN</th>
                 </tr>
               </thead>
               <tbody>
                 {previewData.map((row, index) => (
                   <tr key={index} className="border-b">
                     <td className="px-4 py-2 text-sm">{row.naam}</td>
-                    <td className="px-4 py-2 text-sm font-mono">
-                      {row.unieke_id}
-                    </td>
-                    <td className="px-4 py-2 text-sm">
-                      {row.referentie_rubix || "-"}
-                    </td>
-                    <td className="px-4 py-2 text-sm">
-                      {row.referentie_fabrikant || "-"}
-                    </td>
+                    <td className="px-4 py-2 text-sm font-mono">{row.unieke_id}</td>
+                    <td className="px-4 py-2 text-sm">{row.referentie_rubix || "-"}</td>
+                    <td className="px-4 py-2 text-sm">{row.referentie_fabrikant || "-"}</td>
                     <td className="px-4 py-2 text-sm">{row.ean || "-"}</td>
                   </tr>
                 ))}
@@ -378,18 +327,8 @@ export default function BulkImport() {
                 </>
               ) : (
                 <>
-                  <svg
-                    className="w-4 h-4 mr-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                    />
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                   </svg>
                   Import Starten
                 </>
@@ -410,19 +349,13 @@ export default function BulkImport() {
       {/* Import results */}
       {importResult && (
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-[#051e50]">
-            Import Resultaten
-          </h3>
+          <h3 className="text-lg font-medium text-[#051e50]">Import Resultaten</h3>
 
           {/* Success summary */}
           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
             <div className="flex">
               <div className="flex-shrink-0">
-                <svg
-                  className="h-5 w-5 text-green-400"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
+                <svg className="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
                   <path
                     fillRule="evenodd"
                     d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -431,9 +364,7 @@ export default function BulkImport() {
                 </svg>
               </div>
               <div className="ml-3">
-                <h3 className="text-sm font-medium text-green-800">
-                  Succesvol geïmporteerd: {importResult.success} artikelen
-                </h3>
+                <h3 className="text-sm font-medium text-green-800">Succesvol geïmporteerd: {importResult.success} artikelen</h3>
               </div>
             </div>
           </div>
@@ -441,9 +372,7 @@ export default function BulkImport() {
           {/* Duplicates */}
           {importResult.duplicates.length > 0 && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <h4 className="text-sm font-medium text-yellow-800 mb-2">
-                Duplicaten overgeslagen ({importResult.duplicates.length})
-              </h4>
+              <h4 className="text-sm font-medium text-yellow-800 mb-2">Duplicaten overgeslagen ({importResult.duplicates.length})</h4>
               <div className="text-sm text-yellow-700 space-y-1">
                 {importResult.duplicates.map((dup, index) => (
                   <div key={index}>
@@ -457,9 +386,7 @@ export default function BulkImport() {
           {/* Errors */}
           {importResult.errors.length > 0 && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <h4 className="text-sm font-medium text-red-800 mb-2">
-                Fouten ({importResult.errors.length})
-              </h4>
+              <h4 className="text-sm font-medium text-red-800 mb-2">Fouten ({importResult.errors.length})</h4>
               <div className="text-sm text-red-700 space-y-1 max-h-40 overflow-y-auto">
                 {importResult.errors.map((error, index) => (
                   <div key={index}>
@@ -470,10 +397,7 @@ export default function BulkImport() {
             </div>
           )}
 
-          <button
-            onClick={resetImport}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-          >
+          <button onClick={resetImport} className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
             Nieuwe Import
           </button>
         </div>

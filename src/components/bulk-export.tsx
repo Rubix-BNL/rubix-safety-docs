@@ -2,15 +2,12 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Artikel, Veiligheidsblad } from "@/lib/types";
 
 export default function BulkExport() {
   const [isExporting, setIsExporting] = useState(false);
-  const [exportType, setExportType] = useState<
-    "artikelen" | "veiligheidsbladen" | "alles"
-  >("artikelen");
+  const [exportType, setExportType] = useState<"artikelen" | "veiligheidsbladen" | "alles">("artikelen");
 
-  function convertToCSV(data: any[], filename: string) {
+  function convertToCSV(data: Record<string, unknown>[]): string {
     if (data.length === 0) return "";
 
     const headers = Object.keys(data[0]);
@@ -21,15 +18,12 @@ export default function BulkExport() {
           .map((header) => {
             const value = row[header];
             // Escape quotes and wrap in quotes if contains comma or quote
-            if (
-              typeof value === "string" &&
-              (value.includes(",") || value.includes('"'))
-            ) {
+            if (typeof value === "string" && (value.includes(",") || value.includes('"'))) {
               return `"${value.replace(/"/g, '""')}"`;
             }
             return value || "";
           })
-          .join(","),
+          .join(",")
       ),
     ].join("\n");
 
@@ -52,17 +46,12 @@ export default function BulkExport() {
 
   async function exportArtikelen() {
     try {
-      const { data, error } = await supabase
-        .from("artikelen")
-        .select("*")
-        .order("created_at", { ascending: false });
+      const { data, error } = await supabase.from("artikelen").select("*").order("created_at", { ascending: false });
 
       if (error) throw error;
 
       if (!data || data.length === 0) {
-        alert(
-          "ℹ️ Geen gegevens beschikbaar\n\nEr zijn momenteel geen artikelen in de database om te exporteren.\n\nVoeg eerst artikelen toe voordat u kunt exporteren.",
-        );
+        alert("ℹ️ Geen gegevens beschikbaar\n\nEr zijn momenteel geen artikelen in de database om te exporteren.\n\nVoeg eerst artikelen toe voordat u kunt exporteren.");
         return;
       }
 
@@ -77,12 +66,12 @@ export default function BulkExport() {
         updated_at: artikel.updated_at,
       }));
 
-      const csvContent = convertToCSV(exportData, "artikelen.csv");
+      const csvContent = convertToCSV(exportData);
       const timestamp = new Date().toISOString().split("T")[0];
       downloadCSV(csvContent, `artikelen_export_${timestamp}.csv`);
 
       return data.length;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Export error:", error);
       throw error;
     }
@@ -99,16 +88,14 @@ export default function BulkExport() {
             unieke_id,
             naam
           )
-        `,
+        `
         )
         .order("geupload_op", { ascending: false });
 
       if (error) throw error;
 
       if (!data || data.length === 0) {
-        alert(
-          "ℹ️ Geen gegevens beschikbaar\n\nEr zijn momenteel geen veiligheidsbladen in de database om te exporteren.\n\nUpload eerst veiligheidsbladen voordat u kunt exporteren.",
-        );
+        alert("ℹ️ Geen gegevens beschikbaar\n\nEr zijn momenteel geen veiligheidsbladen in de database om te exporteren.\n\nUpload eerst veiligheidsbladen voordat u kunt exporteren.");
         return;
       }
 
@@ -124,12 +111,12 @@ export default function BulkExport() {
         geupload_op: vb.geupload_op,
       }));
 
-      const csvContent = convertToCSV(exportData, "veiligheidsbladen.csv");
+      const csvContent = convertToCSV(exportData);
       const timestamp = new Date().toISOString().split("T")[0];
       downloadCSV(csvContent, `veiligheidsbladen_export_${timestamp}.csv`);
 
       return data.length;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Export error:", error);
       throw error;
     }
@@ -142,26 +129,18 @@ export default function BulkExport() {
 
       if (exportType === "artikelen") {
         exportedCount = (await exportArtikelen()) || 0;
-        alert(
-          `✅ Export voltooid\n\n${exportedCount} artikelen zijn succesvol geëxporteerd naar een CSV bestand.\n\nHet bestand is automatisch gedownload naar uw Downloads map.`,
-        );
+        alert(`✅ Export voltooid\n\n${exportedCount} artikelen zijn succesvol geëxporteerd naar een CSV bestand.\n\nHet bestand is automatisch gedownload naar uw Downloads map.`);
       } else if (exportType === "veiligheidsbladen") {
         exportedCount = (await exportVeiligheidsbladen()) || 0;
-        alert(
-          `✅ Export voltooid\n\n${exportedCount} veiligheidsbladen zijn succesvol geëxporteerd naar een CSV bestand.\n\nHet bestand is automatisch gedownload naar uw Downloads map.`,
-        );
+        alert(`✅ Export voltooid\n\n${exportedCount} veiligheidsbladen zijn succesvol geëxporteerd naar een CSV bestand.\n\nHet bestand is automatisch gedownload naar uw Downloads map.`);
       } else if (exportType === "alles") {
         const artikelCount = (await exportArtikelen()) || 0;
         const vbCount = (await exportVeiligheidsbladen()) || 0;
-        alert(
-          `✅ Export voltooid\n\nSuccesvol geëxporteerd:\n• ${artikelCount} artikelen\n• ${vbCount} veiligheidsbladen\n\nBeide bestanden zijn automatisch gedownload naar uw Downloads map.`,
-        );
+        alert(`✅ Export voltooid\n\nSuccesvol geëxporteerd:\n• ${artikelCount} artikelen\n• ${vbCount} veiligheidsbladen\n\nBeide bestanden zijn automatisch gedownload naar uw Downloads map.`);
       }
-    } catch (error: any) {
-      console.error("Export failed:", error);
-      alert(
-        `❌ Export mislukt\n\nEr is een fout opgetreden tijdens het exporteren van de gegevens.\n\nFoutmelding: ${error.message || "Onbekende fout"}\n\nProbeer het opnieuw of neem contact op met de beheerder.`,
-      );
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Onbekende fout";
+      alert(`❌ Export mislukt\n\nEr is een fout opgetreden tijdens het exporteren van de gegevens.\n\nFoutmelding: ${errorMessage}\n\nProbeer het opnieuw of neem contact op met de beheerder.`);
     } finally {
       setIsExporting(false);
     }
@@ -170,20 +149,13 @@ export default function BulkExport() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold text-[#051e50] mb-4">
-          Data Exporteren
-        </h2>
-        <p className="text-gray-600 mb-6">
-          Exporteer je data als CSV bestanden die je kunt openen in Excel of
-          andere spreadsheet programma's.
-        </p>
+        <h2 className="text-xl font-semibold text-[#051e50] mb-4">Data Exporteren</h2>
+        <p className="text-gray-600 mb-6">Exporteer je data als CSV bestanden die je kunt openen in Excel of andere spreadsheet programma&apos;s.</p>
       </div>
 
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-[#051e50] mb-2">
-            Wat wil je exporteren?
-          </label>
+          <label className="block text-sm font-medium text-[#051e50] mb-2">Wat wil je exporteren?</label>
           <div className="space-y-2">
             <label className="flex items-center">
               <input
@@ -191,7 +163,7 @@ export default function BulkExport() {
                 name="exportType"
                 value="artikelen"
                 checked={exportType === "artikelen"}
-                onChange={(e) => setExportType(e.target.value as any)}
+                onChange={(e) => setExportType(e.target.value as "artikelen" | "veiligheidsbladen" | "alles")}
                 className="mr-2"
               />
               <span className="text-sm text-gray-700">Alleen artikelen</span>
@@ -202,12 +174,10 @@ export default function BulkExport() {
                 name="exportType"
                 value="veiligheidsbladen"
                 checked={exportType === "veiligheidsbladen"}
-                onChange={(e) => setExportType(e.target.value as any)}
+                onChange={(e) => setExportType(e.target.value as "artikelen" | "veiligheidsbladen" | "alles")}
                 className="mr-2"
               />
-              <span className="text-sm text-gray-700">
-                Alleen veiligheidsbladen
-              </span>
+              <span className="text-sm text-gray-700">Alleen veiligheidsbladen</span>
             </label>
             <label className="flex items-center">
               <input
@@ -215,12 +185,10 @@ export default function BulkExport() {
                 name="exportType"
                 value="alles"
                 checked={exportType === "alles"}
-                onChange={(e) => setExportType(e.target.value as any)}
+                onChange={(e) => setExportType(e.target.value as "artikelen" | "veiligheidsbladen" | "alles")}
                 className="mr-2"
               />
-              <span className="text-sm text-gray-700">
-                Alles (aparte bestanden)
-              </span>
+              <span className="text-sm text-gray-700">Alles (aparte bestanden)</span>
             </label>
           </div>
         </div>
@@ -238,18 +206,8 @@ export default function BulkExport() {
               </>
             ) : (
               <>
-                <svg
-                  className="w-4 h-4 mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z"
-                  />
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
                 </svg>
                 Export Starten
               </>
@@ -258,8 +216,7 @@ export default function BulkExport() {
 
           <div className="text-sm text-gray-500">
             {exportType === "artikelen" && "CSV bestand met alle artikelen"}
-            {exportType === "veiligheidsbladen" &&
-              "CSV bestand met alle veiligheidsbladen"}
+            {exportType === "veiligheidsbladen" && "CSV bestand met alle veiligheidsbladen"}
             {exportType === "alles" && "Twee aparte CSV bestanden"}
           </div>
         </div>
@@ -268,11 +225,7 @@ export default function BulkExport() {
       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
         <div className="flex">
           <div className="flex-shrink-0">
-            <svg
-              className="h-5 w-5 text-yellow-400"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
+            <svg className="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
               <path
                 fillRule="evenodd"
                 d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
@@ -283,10 +236,7 @@ export default function BulkExport() {
           <div className="ml-3">
             <h3 className="text-sm font-medium text-yellow-800">Let op</h3>
             <div className="mt-2 text-sm text-yellow-700">
-              <p>
-                De geëxporteerde bestanden bevatten gevoelige data. Behandel
-                deze bestanden vertrouwelijk en verwijder ze na gebruik.
-              </p>
+              <p>De geëxporteerde bestanden bevatten gevoelige data. Behandel deze bestanden vertrouwelijk en verwijder ze na gebruik.</p>
             </div>
           </div>
         </div>
