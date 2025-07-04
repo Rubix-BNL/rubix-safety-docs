@@ -6,8 +6,8 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true,
+    persistSession: typeof window !== "undefined",
+    detectSessionInUrl: typeof window !== "undefined",
     // Reduce retry attempts for faster error handling
     retries: 1,
     // Handle storage events for better session sync across tabs
