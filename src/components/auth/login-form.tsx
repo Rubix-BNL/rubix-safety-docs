@@ -34,7 +34,11 @@ export default function LoginForm() {
       }
     } catch (err: any) {
       console.error("Auth error:", err);
-      if (mode === "login") {
+
+      // Handle specific auth errors
+      if (err.message?.includes("refresh") || err.message?.includes("token")) {
+        setError("Sessie verlopen. Probeer opnieuw in te loggen.");
+      } else if (mode === "login") {
         setError("Onjuiste email of wachtwoord");
       } else {
         setError(err.message || "Fout bij aanmaken account");
