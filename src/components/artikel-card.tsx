@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 
 interface ArtikelCardProps {
   artikel: Artikel;
-  onUpdate: () => void;
+  onUpdate?: () => void;
 }
 
 export default function ArtikelCard({ artikel, onUpdate }: ArtikelCardProps) {
@@ -21,7 +21,7 @@ export default function ArtikelCard({ artikel, onUpdate }: ArtikelCardProps) {
 
   useEffect(() => {
     loadVeiligheidsbladen();
-  }, [artikel.id]);
+  }, [artikel.id, loadVeiligheidsbladen]);
 
   async function loadVeiligheidsbladen() {
     try {
