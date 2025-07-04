@@ -53,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         // Add timeout to prevent hanging
         const timeout = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("Auth timeout")), 10000),
+          setTimeout(() => reject(new Error("Auth timeout")), 5000),
         );
 
         const sessionPromise = supabase.auth.getSession();
@@ -86,6 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } catch (error) {
         console.error("Auth initialization error:", error);
+        // Force loading to false even on timeout/error
         if (mounted) {
           setLoading(false);
         }
