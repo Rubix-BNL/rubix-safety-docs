@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
-import { Artikel } from "@/lib/types";
 import BulkExport from "@/components/bulk-export";
 import BulkImport from "@/components/bulk-import";
 import BulkDocumentUpload from "@/components/bulk-document-upload";
